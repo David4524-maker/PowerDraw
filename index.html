@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PowerDraw</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .toolbar {
+      background: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      width: 800px;
+      max-width: 100%;
+      border-bottom: 1px solid #e1e4e8;
+    }
+
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    button {
+      background-color: #e1e4e8;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #d0d7de;
+    }
+
+    button.active {
+      background-color: #0969da;
+      color: white;
+    }
+
+    button.danger {
+      background-color: #cf222e;
+      color: white;
+    }
+
+    button.danger:hover {
+      background-color: #a40e26;
+    }
+
+    button.success {
+      background-color: #1f883d;
+      color: white;
+    }
+
+    button.success:hover {
+      background-color: #1a7f37;
+    }
+
+    input[type="color"] {
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      cursor: pointer;
+      background: none;
+    }
+
+    .canvas-container {
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      background-color: #ffffff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="tool-group">
+      <span style="font-weight: bold; color: #0969da;">PowerDraw</span>
+    </div>
+
+    <div class="tool-group">
+      <label for="colorPicker">Color:</label>
+      <input type="color" id="colorPicker" value="#000000">
+    </div>
+
+    <div class="tool-group">
+      <label for="brushSize">Grosor: <span id="sizeValue">5</span>px</label>
+      <input type="range" id="brushSize" min="1" max="50" value="5">
+    </div>
+
+    <div class="tool-group">
+      <button id="brushBtn" class="active">Pincel</button>
+      <button id="eraserBtn">Borrador</button>
+    </div>
+
+    <div class="tool-group">
+      <button id="clearBtn" class="danger">Limpiar</button>
+      <button id="saveBtn" class="success">Guardar</button>
+    </div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="paintCanvas" width="800" height="500"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const colorPicker = document.getElementById('colorPicker');
+    const brushSize = document.getElementById('brushSize');
+    const sizeValue = document.getElementById('sizeValue');
+    const brushBtn = document.getElementById('brushBtn');
+    const eraserBtn = document.getElementById('eraserBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const saveBtn = document.getElementById('saveBtn');
+
+    let isDrawing = false;
+    let currentTool = 'brush';
+    let lastX = 0;
+    let lastY = 0;
+
+    // Fondo blanco inicial obligatorio
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    colorPicker.addEventListener('input', () => {
+      if (currentTool === 'eraser') setBrushTool();
+    });
+
+    brushSize.addEventListener('input', (e) => {
+      sizeValue.textContent = e.target.value;
+    });
+
+    brushBtn.addEventListener('click', setBrushTool);
+    eraserBtn.addEventListener('click', setEraserTool);
+
+    function setBrushTool() {
+      currentTool = 'brush';
+      brushBtn.classList.add('active');
+      eraserBtn.classList.remove('active');
+    }
+
+    function setEraserTool() {
+      currentTool = 'eraser';
+      eraserBtn.classList.add('active');
+      brushBtn.classList.remove('active');
+    }
+
+    function getMousePos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+      const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+      };
+    }
+
+    function startDrawing(e) {
+      isDrawing = true;
+      const pos = getMousePos(e);
+      lastX = pos.x;
+      lastY = pos.y;
+      e.preventDefault();
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const pos = getMousePos(e);
+
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : colorPicker.value;
+      ctx.lineWidth = brushSize.value;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      lastX = pos.x;
+      lastY = pos.y;
+      e.preventDefault();
+    }
+
+    function stopDrawing() {
+      isDrawing = false;
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+
+    // Limpiar de un solo clic sin confirmación
+    clearBtn.addEventListener('click', () => {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = 'powerdraw-arte.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+
+</body>
+</html>
