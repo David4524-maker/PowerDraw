@@ -1,247 +1,2082 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PowerDraw</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0969da">
+<title>PowerDraw 2.1 · Multilingual</title>
+<style>
+/* ============================================================
+   1. TEMA Y VARIABLES
+   ============================================================ */
+:root{
+  --bg:#eef1f6; --panel:#ffffff; --panel-2:#f6f8fa;
+  --text:#1f2328; --muted:#656d76; --border:#d0d7de;
+  --accent:#0969da; --accent-soft:#ddf4ff;
+  --danger:#cf222e; --success:#1f883d; --warn:#bf8700;
+  --radius:10px; --shadow:0 8px 24px rgba(16,22,26,.12);
+  --focus:0 0 0 3px rgba(9,105,218,.35);
+}
+[data-theme="dark"]{
+  --bg:#0d1117; --panel:#161b22; --panel-2:#21262d;
+  --text:#e6edf3; --muted:#8b949e; --border:#30363d;
+  --accent:#2f81f7; --accent-soft:#0c2d6b;
+  --shadow:0 8px 24px rgba(0,0,0,.55);
+  --focus:0 0 0 3px rgba(47,129,247,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,'Noto Sans JP','Noto Sans SC','Noto Sans Arabic',sans-serif;
+  background:var(--bg); color:var(--text);
+  overflow:hidden;
+  transition:background .25s ease,color .25s ease;
+}
+html[dir="rtl"] body{direction:rtl}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f2f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
+/* ============================================================
+   2. ESTRUCTURA
+   ============================================================ */
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
-    .toolbar {
-      background: #ffffff;
-      padding: 12px 20px;
-      border-radius: 8px 8px 0 0;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      flex-wrap: wrap;
-      width: 800px;
-      max-width: 100%;
-      border-bottom: 1px solid #e1e4e8;
-    }
+.app-header{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:8px 16px;background:var(--panel);
+  border-bottom:1px solid var(--border);flex:0 0 auto;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.3px}
+.brand .dot{
+  width:14px;height:14px;border-radius:50%;
+  background:conic-gradient(#f1c40f,#e74c3c,#9b59b6,#3498db,#2ecc71,#f1c40f);
+}
+.brand small{font-weight:500;color:var(--muted);font-size:11px}
+.header-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 
-    .tool-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: #333;
-    }
+/* Selector de idioma */
+.lang-select{
+  font-family:inherit;font-size:12px;font-weight:600;
+  background:var(--panel-2);color:var(--text);
+  border:1px solid var(--border);border-radius:8px;
+  padding:5px 8px;cursor:pointer;
+}
+.lang-select:hover{border-color:var(--accent)}
+.lang-select:focus-visible{outline:none;box-shadow:var(--focus)}
 
-    button {
-      background-color: #e1e4e8;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
+/* ------- Barra de herramientas ------- */
+.toolbar{
+  display:flex;flex-wrap:wrap;gap:10px;padding:10px 14px;
+  background:var(--panel);border-bottom:1px solid var(--border);
+  flex:0 0 auto;max-height:44vh;overflow:auto;
+}
+.group{
+  display:flex;flex-direction:column;gap:6px;
+  padding:8px 10px;background:var(--panel-2);
+  border:1px solid var(--border);border-radius:var(--radius);
+}
+.group-title{
+  font-size:10px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--muted);font-weight:700;
+}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mini{font-size:11px;color:var(--muted)}
 
-    button:hover {
-      background-color: #d0d7de;
-    }
+/* ------- Botones ------- */
+button{
+  font-family:inherit;font-size:13px;font-weight:600;
+  background:var(--panel);color:var(--text);
+  border:1px solid var(--border);border-radius:8px;
+  padding:6px 10px;cursor:pointer;
+  transition:background .15s,border-color .15s,transform .08s;
+}
+button:hover{background:var(--accent-soft);border-color:var(--accent)}
+button:active{transform:scale(.96)}
+button:focus-visible{outline:none;box-shadow:var(--focus)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+button.success{background:var(--success);border-color:var(--success);color:#fff}
+button.icon{padding:6px 9px;font-size:15px;line-height:1}
 
-    button.active {
-      background-color: #0969da;
-      color: white;
-    }
+/* ------- Herramientas ------- */
+.tools{display:flex;flex-wrap:wrap;gap:5px;max-width:520px}
+.tool-btn{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  min-width:56px;padding:5px 6px;font-size:9px;line-height:1.1;
+}
+.tool-btn .ico{font-size:17px}
+.tool-btn .lbl{white-space:nowrap;opacity:.85}
 
-    button.danger {
-      background-color: #cf222e;
-      color: white;
-    }
+/* ------- Color ------- */
+input[type="color"]{
+  width:38px;height:38px;padding:0;border:2px solid var(--border);
+  border-radius:9px;cursor:pointer;background:none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper{padding:2px}
+input[type="color"]::-webkit-color-swatch{border:none;border-radius:6px}
+.palette{display:grid;grid-template-columns:repeat(8,18px);gap:4px}
+.swatch{
+  width:18px;height:18px;border-radius:5px;padding:0;
+  border:1px solid rgba(0,0,0,.2);cursor:pointer;
+}
+.swatch:hover{transform:scale(1.18)}
+.recent-row{align-items:center}
 
-    button.danger:hover {
-      background-color: #a40e26;
-    }
+/* ------- Controles ------- */
+.slider{display:flex;flex-direction:column;font-size:11px;color:var(--muted);gap:2px}
+.slider output{color:var(--accent);font-weight:700}
+input[type="range"]{-webkit-appearance:none;appearance:none;width:150px;height:20px;background:transparent;cursor:pointer}
+input[type="range"]::-webkit-slider-runnable-track{height:5px;border-radius:99px;background:var(--border)}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:15px;height:15px;margin-top:-5px;
+  border-radius:50%;background:var(--accent);border:2px solid var(--panel);
+}
+input[type="range"]::-moz-range-track{height:5px;border-radius:99px;background:var(--border)}
+input[type="range"]::-moz-range-thumb{width:13px;height:13px;border:2px solid var(--panel);border-radius:50%;background:var(--accent)}
+select{
+  font-family:inherit;font-size:12px;padding:5px 7px;
+  background:var(--panel);color:var(--text);
+  border:1px solid var(--border);border-radius:8px;cursor:pointer;
+}
+label.chk{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;user-select:none}
+input[type="checkbox"]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
 
-    button.success {
-      background-color: #1f883d;
-      color: white;
-    }
+/* ------- Escenario ------- */
+.stage{
+  flex:1 1 auto;display:flex;overflow:auto;padding:20px;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(9,105,218,.06),transparent 55%),
+    radial-gradient(circle at 85% 100%,rgba(155,89,182,.07),transparent 55%),
+    var(--bg);
+  overscroll-behavior:contain;
+}
+.canvas-wrap{
+  margin:auto;position:relative;flex:0 0 auto;
+  border-radius:6px;box-shadow:var(--shadow);
+  background-image:
+    linear-gradient(45deg,#d8dde3 25%,transparent 25%),
+    linear-gradient(-45deg,#d8dde3 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#d8dde3 75%),
+    linear-gradient(-45deg,transparent 75%,#d8dde3 75%);
+  background-size:20px 20px;
+  background-position:0 0,0 10px,10px -10px,-10px 0;
+  background-color:#fff;
+}
+#paintCanvas{display:block;touch-action:none;cursor:crosshair;border-radius:6px}
+#overlayCanvas{position:absolute;inset:0;pointer-events:none;border-radius:6px}
+.canvas-wrap.dragover::after{
+  content:attr(data-drop-label);
+  position:absolute;inset:0;display:grid;place-items:center;
+  background:rgba(9,105,218,.75);color:#fff;font-weight:700;
+  font-size:18px;border-radius:6px;pointer-events:none;
+}
+.text-input{
+  position:absolute;z-index:5;min-width:140px;
+  background:rgba(255,255,255,.94);color:#111;
+  border:2px dashed var(--accent);border-radius:6px;
+  padding:2px 6px;font-family:inherit;outline:none;
+}
 
-    button.success:hover {
-      background-color: #1a7f37;
-    }
+/* ------- Barra de estado ------- */
+.statusbar{
+  flex:0 0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:5px 16px;font-size:11.5px;color:var(--muted);
+  background:var(--panel);border-top:1px solid var(--border);
+}
+.statusbar b{color:var(--text);font-weight:600}
+.status-ok{color:var(--success);font-weight:600}
+.status-warn{color:var(--warn);font-weight:600}
 
-    input[type="color"] {
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 4px;
-      cursor: pointer;
-      background: none;
-    }
+/* ------- Avisos (toasts) ------- */
+.toasts{
+  position:fixed;right:16px;bottom:16px;z-index:60;
+  display:flex;flex-direction:column;gap:8px;align-items:flex-end;
+  pointer-events:none;
+}
+html[dir="rtl"] .toasts{right:auto;left:16px;align-items:flex-start}
+.toast{
+  background:var(--panel);color:var(--text);
+  border:1px solid var(--border);border-left:4px solid var(--accent);
+  border-radius:9px;padding:9px 14px;font-size:13px;font-weight:600;
+  box-shadow:var(--shadow);animation:slideIn .22s ease;
+  max-width:330px;
+}
+html[dir="rtl"] .toast{border-left:1px solid var(--border);border-right:4px solid var(--accent)}
+.toast.success{border-left-color:var(--success)}
+html[dir="rtl"] .toast.success{border-right-color:var(--success);border-left-color:var(--border)}
+.toast.error{border-left-color:var(--danger)}
+html[dir="rtl"] .toast.error{border-right-color:var(--danger);border-left-color:var(--border)}
+.toast.warn{border-left-color:var(--warn)}
+html[dir="rtl"] .toast.warn{border-right-color:var(--warn);border-left-color:var(--border)}
+@keyframes slideIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
 
-    .canvas-container {
-      background: #ffffff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border-radius: 0 0 8px 8px;
-      overflow: hidden;
-    }
+/* ------- Diálogo de ayuda ------- */
+dialog{
+  border:1px solid var(--border);border-radius:14px;padding:0;
+  background:var(--panel);color:var(--text);max-width:660px;width:92%;
+  box-shadow:var(--shadow);
+}
+dialog::backdrop{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
+.dialog-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.dialog-head h2{font-size:16px}
+.dialog-body{padding:16px 18px;max-height:62vh;overflow:auto;font-size:13.5px;line-height:1.7}
+.dialog-body h3{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:14px 0 6px}
+.dialog-body h3:first-child{margin-top:0}
+kbd{
+  background:var(--panel-2);border:1px solid var(--border);border-bottom-width:2px;
+  border-radius:5px;padding:1px 6px;font-family:ui-monospace,Consolas,monospace;
+  font-size:11.5px;
+}
+.shortcut-grid{display:grid;grid-template-columns:1fr auto;gap:5px 16px;align-items:center}
+html[dir="rtl"] .shortcut-grid{grid-template-columns:auto 1fr}
 
-    canvas {
-      display: block;
-      background-color: #ffffff;
-      cursor: crosshair;
-      touch-action: none;
-    }
-  </style>
+/* ------- Responsive ------- */
+@media (max-width:820px){
+  .toolbar{max-height:38vh;padding:8px}
+  .tools{max-width:100%}
+  .tool-btn{min-width:48px;font-size:8px}
+  .tool-btn .lbl{display:none}
+  input[type="range"]{width:110px}
+  .statusbar{gap:10px;font-size:10.5px}
+}
+</style>
 </head>
 <body>
 
-  <div class="toolbar">
-    <div class="tool-group">
-      <span style="font-weight: bold; color: #0969da;">PowerDraw</span>
+<div id="app">
+
+  <!-- ============ CABECERA ============ -->
+  <header class="app-header">
+    <div class="brand">
+      <span class="dot"></span>
+      <span>PowerDraw <small>2.1</small></span>
+    </div>
+    <div class="header-actions">
+      <select id="langSel" class="lang-select" aria-label="Language / Idioma"></select>
+      <button class="icon" id="undoBtn" data-i18n-title="ui.undo" aria-label="Undo">↶</button>
+      <button class="icon" id="redoBtn" data-i18n-title="ui.redo" aria-label="Redo">↷</button>
+      <button class="icon" id="themeBtn" data-i18n-title="ui.theme" aria-label="Theme">🌙</button>
+      <button class="icon" id="fullscreenBtn" data-i18n-title="ui.fullscreen" aria-label="Fullscreen">⛶</button>
+      <button class="icon" id="helpBtn" data-i18n-title="ui.help" aria-label="Help">?</button>
+    </div>
+  </header>
+
+  <!-- ============ BARRA DE HERRAMIENTAS ============ -->
+  <div class="toolbar" id="toolbar">
+
+    <div class="group">
+      <span class="group-title" data-i18n="ui.tools">Herramientas</span>
+      <div class="tools" id="tools"></div>
     </div>
 
-    <div class="tool-group">
-      <label for="colorPicker">Color:</label>
-      <input type="color" id="colorPicker" value="#000000">
+    <div class="group">
+      <span class="group-title" data-i18n="ui.color">Color</span>
+      <div class="row">
+        <input type="color" id="colorPicker" value="#111111" data-i18n-title="ui.colorStroke" aria-label="Color">
+        <div class="palette" id="palette"></div>
+      </div>
+      <div class="row recent-row">
+        <span class="mini" data-i18n="ui.recent">Recientes</span>
+        <div class="palette" id="recentColors"></div>
+      </div>
     </div>
 
-    <div class="tool-group">
-      <label for="brushSize">Grosor: <span id="sizeValue">5</span>px</label>
-      <input type="range" id="brushSize" min="1" max="50" value="5">
+    <div class="group">
+      <span class="group-title" data-i18n="ui.brush">Pincel</span>
+      <label class="slider"><span data-i18n="ui.thickness">Grosor</span> <output id="sizeValue">8</output> px
+        <input type="range" id="brushSize" min="1" max="120" value="8">
+      </label>
+      <label class="slider"><span data-i18n="ui.opacity">Opacidad</span> <output id="opacityValue">100</output> %
+        <input type="range" id="opacity" min="5" max="100" value="100">
+      </label>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="pressureChk" checked> <span data-i18n="ui.pressure">Presión</span></label>
+      </div>
     </div>
 
-    <div class="tool-group">
-      <button id="brushBtn" class="active">Pincel</button>
-      <button id="eraserBtn">Borrador</button>
+    <div class="group">
+      <span class="group-title" data-i18n="ui.shapes">Formas y ayudas</span>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="fillChk"> <span data-i18n="ui.fill">Relleno</span></label>
+        <label class="chk"><input type="checkbox" id="gridChk"> <span data-i18n="ui.grid">Cuadrícula</span></label>
+        <label class="chk"><input type="checkbox" id="snapChk"> <span data-i18n="ui.snap">Imán</span></label>
+      </div>
+      <div class="row">
+        <select id="symmetrySel" data-i18n-title="ui.symmetry" aria-label="Symmetry">
+          <option value="none" data-i18n="sym.none">Sin simetría</option>
+          <option value="vertical" data-i18n="sym.vertical">Espejo vertical</option>
+          <option value="horizontal" data-i18n="sym.horizontal">Espejo horizontal</option>
+          <option value="both" data-i18n="sym.both">4 espejos</option>
+          <option value="radial4" data-i18n="sym.radial4">Radial ×4</option>
+          <option value="radial8" data-i18n="sym.radial8">Radial ×8</option>
+          <option value="kaleido" data-i18n="sym.kaleido">Caleidoscopio</option>
+        </select>
+        <select id="stampSel" data-i18n-title="ui.stamp" aria-label="Stamp">
+          <option>⭐</option><option>❤️</option><option>😀</option>
+          <option>🌸</option><option>🐱</option><option>🎈</option>
+          <option>✅</option><option>🔥</option><option>💎</option>
+        </select>
+      </div>
     </div>
 
-    <div class="tool-group">
-      <button id="clearBtn" class="danger">Limpiar</button>
-      <button id="saveBtn" class="success">Guardar</button>
+    <div class="group">
+      <span class="group-title" data-i18n="ui.canvas">Lienzo</span>
+      <div class="row">
+        <select id="sizePreset" data-i18n-title="ui.canvasSize" aria-label="Canvas size">
+          <option value="800x500">800 × 500</option>
+          <option value="1200x750" selected>1200 × 750</option>
+          <option value="1600x1000">1600 × 1000</option>
+          <option value="1920x1200">1920 × 1200</option>
+          <option value="1080x1080" data-i18n="size.square">1080 × 1080 (cuadrado)</option>
+        </select>
+        <label class="chk" data-i18n-title="ui.bgAlphaHint">
+          <input type="checkbox" id="transparentChk"> <span data-i18n="ui.transparent">Fondo α</span>
+        </label>
+        <input type="color" id="bgColor" value="#ffffff" data-i18n-title="ui.bgColor" aria-label="Background">
+      </div>
+      <div class="row">
+        <button class="icon" id="zoomOut" data-i18n-title="ui.zoomOut">➖</button>
+        <button class="icon" id="zoomIn" data-i18n-title="ui.zoomIn">➕</button>
+        <button id="zoomFit" data-i18n="ui.fit">Ajustar</button>
+        <button id="zoom100">100%</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="group-title" data-i18n="ui.image">Imagen</span>
+      <div class="row">
+        <button id="rotateL" data-i18n-title="ui.rotL">⟲</button>
+        <button id="rotateR" data-i18n-title="ui.rotR">⟳</button>
+        <button id="flipH" data-i18n-title="ui.flipH">⇋</button>
+        <button id="flipV" data-i18n-title="ui.flipV">⇅</button>
+      </div>
+      <div class="row">
+        <select id="filterSel" data-i18n-title="ui.filters" aria-label="Filters">
+          <option value="" data-i18n="ui.filters">Filtros…</option>
+          <option value="grayscale(1)" data-i18n="filter.grayscale">Escala de grises</option>
+          <option value="invert(1)" data-i18n="filter.invert">Invertir colores</option>
+          <option value="sepia(.85)" data-i18n="filter.sepia">Sepia</option>
+          <option value="blur(4px)" data-i18n="filter.blur">Desenfoque</option>
+          <option value="saturate(1.8)" data-i18n="filter.saturate">Saturar</option>
+          <option value="contrast(1.5)" data-i18n="filter.contrast">Alto contraste</option>
+          <option value="brightness(1.25)" data-i18n="filter.brighten">Aclarar</option>
+          <option value="hue-rotate(90deg)" data-i18n="filter.hue">Girar tono</option>
+        </select>
+        <button id="openBtn" data-i18n-title="ui.open">📂</button>
+        <button id="pasteBtn" data-i18n-title="ui.paste">📋</button>
+      </div>
+      <div class="row">
+        <select id="exportFormat" data-i18n-title="ui.format" aria-label="Format">
+          <option value="png">PNG</option>
+          <option value="jpeg">JPEG</option>
+          <option value="webp">WebP</option>
+        </select>
+        <button class="success" id="saveBtn" data-i18n-title="ui.saveHint">💾 <span data-i18n="ui.save">Guardar</span></button>
+        <button id="copyBtn" data-i18n-title="ui.copyHint">⧉ <span data-i18n="ui.copy">Copiar</span></button>
+        <button id="shareBtn" data-i18n-title="ui.shareHint">↗ <span data-i18n="ui.share">Compartir</span></button>
+        <button id="printBtn" data-i18n-title="ui.printHint">🖨️</button>
+      </div>
+      <div class="row">
+        <button class="danger" id="clearBtn" data-i18n-title="ui.clearHint">🗑️ <span data-i18n="ui.clear">Limpiar</span></button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ ÁREA DE DIBUJO ============ -->
+  <div class="stage" id="stage">
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="paintCanvas" width="1200" height="750"></canvas>
+      <canvas id="overlayCanvas" width="1200" height="750"></canvas>
     </div>
   </div>
 
-  <div class="canvas-container">
-    <canvas id="paintCanvas" width="800" height="500"></canvas>
+  <!-- ============ BARRA DE ESTADO ============ -->
+  <footer class="statusbar">
+    <span><span data-i18n="status.position">Posición</span>: <b id="coords">—, —</b></span>
+    <span><span data-i18n="status.zoom">Zoom</span>: <b id="zoomLabel">100%</b></span>
+    <span><span data-i18n="status.canvas">Lienzo</span>: <b id="sizeLabel">1200 × 750</b></span>
+    <span><span data-i18n="status.stroke">Trazo</span>: <b id="brushLabel">Pincel · 8px</b></span>
+    <span><span data-i18n="status.actions">Acciones</span>: <b id="strokeCount">0</b></span>
+    <span id="autoStatus" class="status-ok"></span>
+  </footer>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<!-- Ayuda -->
+<dialog id="helpDialog" aria-labelledby="helpTitle">
+  <div class="dialog-head">
+    <h2 id="helpTitle" data-i18n="help.title">🎨 PowerDraw 2.1 · Ayuda</h2>
+    <button class="icon" id="helpClose" data-i18n-title="ui.close" aria-label="Close">✕</button>
   </div>
+  <div class="dialog-body">
+    <h3 data-i18n="help.shortcuts">Atajos de teclado</h3>
+    <div class="shortcut-grid">
+      <span data-i18n="help.undoRedo">Deshacer / Rehacer</span><span><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></span>
+      <span data-i18n="help.save">Guardar imagen</span><span><kbd>Ctrl</kbd>+<kbd>S</kbd></span>
+      <span data-i18n="help.open">Abrir imagen</span><span><kbd>Ctrl</kbd>+<kbd>O</kbd></span>
+      <span data-i18n="help.toolRow1">Pincel · Borrador · Línea · Rectángulo</span><span><kbd>B</kbd> <kbd>E</kbd> <kbd>L</kbd> <kbd>R</kbd></span>
+      <span data-i18n="help.toolRow2">Elipse · Texto · Relleno · Cuentagotas</span><span><kbd>O</kbd> <kbd>T</kbd> <kbd>G</kbd> <kbd>I</kbd></span>
+      <span data-i18n="help.thickness">Grosor − / +</span><span><kbd>[</kbd> / <kbd>]</kbd></span>
+      <span data-i18n="help.zoom">Zoom − / + / Ajustar</span><span><kbd>-</kbd> <kbd>+</kbd> <kbd>0</kbd></span>
+      <span data-i18n="help.grid">Cuadrícula · Imán</span><span><kbd>H</kbd> · <kbd>J</kbd></span>
+      <span data-i18n="help.fs">Pantalla completa · Ayuda</span><span><kbd>F</kbd> · <kbd>?</kbd></span>
+    </div>
+    <h3 data-i18n="help.gestures">Gestos y trucos</h3>
+    <p data-i18n-html="help.gesturesText">
+      • Mantén <kbd>Shift</kbd> mientras dibujas una forma para proporciones perfectas.<br>
+      • Mantén <kbd>Alt</kbd> para dibujar la forma desde su centro.<br>
+      • Arrastra una imagen al lienzo o pégala con <kbd>Ctrl</kbd>+<kbd>V</kbd>.<br>
+      • La simetría se aplica a <em>todas</em> las herramientas de trazo y forma.<br>
+      • Todo se autoguarda en el navegador: al volver, tu dibujo seguirá ahí.
+    </p>
+  </div>
+</dialog>
 
-  <script>
-    const canvas = document.getElementById('paintCanvas');
-    const ctx = canvas.getContext('2d');
+<input type="file" id="fileInput" accept="image/*" hidden>
 
-    const colorPicker = document.getElementById('colorPicker');
-    const brushSize = document.getElementById('brushSize');
-    const sizeValue = document.getElementById('sizeValue');
-    const brushBtn = document.getElementById('brushBtn');
-    const eraserBtn = document.getElementById('eraserBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const saveBtn = document.getElementById('saveBtn');
+<script>
+"use strict";
+/* ============================================================================
+   PowerDraw 2.1 · Multilingual
+   Motor de dibujo por capas + sistema i18n completo para 10 idiomas.
+   ========================================================================== */
 
-    let isDrawing = false;
-    let currentTool = 'brush';
-    let lastX = 0;
-    let lastY = 0;
+/* ============================================================================
+   I18N · DICCIONARIO Y MOTOR DE TRADUCCIÓN
+   ========================================================================== */
+const LANGUAGES = [
+  { code:'es', label:'Español',   flag:'🇪🇸', dir:'ltr' },
+  { code:'en', label:'English',   flag:'🇬🇧', dir:'ltr' },
+  { code:'pt', label:'Português', flag:'🇧🇷', dir:'ltr' },
+  { code:'fr', label:'Français',  flag:'🇫🇷', dir:'ltr' },
+  { code:'de', label:'Deutsch',   flag:'🇩🇪', dir:'ltr' },
+  { code:'it', label:'Italiano',  flag:'🇮🇹', dir:'ltr' },
+  { code:'ja', label:'日本語',    flag:'🇯🇵', dir:'ltr' },
+  { code:'zh', label:'中文',       flag:'🇨🇳', dir:'ltr' },
+  { code:'ru', label:'Русский',   flag:'🇷🇺', dir:'ltr' },
+  { code:'ar', label:'العربية',   flag:'🇸🇦', dir:'rtl' }
+];
 
-    // Fondo blanco inicial obligatorio
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+const I18N = {
+  /* ---------------- ESPAÑOL ---------------- */
+  es: {
+    'app.title':'PowerDraw 2.1 · Estudio de dibujo',
+    'ui.tools':'Herramientas','ui.color':'Color','ui.colorStroke':'Color de trazo',
+    'ui.recent':'Recientes','ui.brush':'Pincel','ui.thickness':'Grosor','ui.opacity':'Opacidad',
+    'ui.pressure':'Presión','ui.shapes':'Formas y ayudas','ui.fill':'Relleno','ui.grid':'Cuadrícula',
+    'ui.snap':'Imán','ui.symmetry':'Simetría','ui.stamp':'Sello','ui.canvas':'Lienzo',
+    'ui.canvasSize':'Tamaño del lienzo','ui.transparent':'Fondo α','ui.bgAlphaHint':'Fondo transparente (PNG con alfa)',
+    'ui.bgColor':'Color de fondo','ui.zoomOut':'Alejar (-)','ui.zoomIn':'Acercar (+)','ui.fit':'Ajustar',
+    'ui.image':'Imagen','ui.rotL':'Rotar 90° a la izquierda','ui.rotR':'Rotar 90° a la derecha',
+    'ui.flipH':'Voltear horizontal','ui.flipV':'Voltear vertical','ui.filters':'Filtros…',
+    'ui.open':'Abrir imagen (Ctrl+O)','ui.paste':'Pegar imagen del portapapeles','ui.format':'Formato de exportación',
+    'ui.save':'Guardar','ui.saveHint':'Guardar (Ctrl+S)','ui.copy':'Copiar','ui.copyHint':'Copiar al portapapeles',
+    'ui.share':'Compartir','ui.shareHint':'Compartir','ui.printHint':'Imprimir','ui.clear':'Limpiar',
+    'ui.clearHint':'Limpiar lienzo (se puede deshacer)','ui.undo':'Deshacer (Ctrl+Z)','ui.redo':'Rehacer (Ctrl+Y)',
+    'ui.theme':'Tema claro / oscuro','ui.fullscreen':'Pantalla completa (F)','ui.help':'Ayuda y atajos (?)',
+    'ui.close':'Cerrar','size.square':'1080 × 1080 (cuadrado)',
+    'sym.none':'Sin simetría','sym.vertical':'Espejo vertical','sym.horizontal':'Espejo horizontal',
+    'sym.both':'4 espejos','sym.radial4':'Radial ×4','sym.radial8':'Radial ×8','sym.kaleido':'Caleidoscopio',
+    'filter.grayscale':'Escala de grises','filter.invert':'Invertir colores','filter.sepia':'Sepia',
+    'filter.blur':'Desenfoque','filter.saturate':'Saturar','filter.contrast':'Alto contraste',
+    'filter.brighten':'Aclarar','filter.hue':'Girar tono',
+    'tool.brush':'Pincel','tool.pencil':'Lápiz','tool.calligraphy':'Caligrafía','tool.highlighter':'Resaltador',
+    'tool.neon':'Neón','tool.rainbow':'Arcoíris','tool.spray':'Aerosol','tool.eraser':'Borrador',
+    'tool.line':'Línea','tool.rect':'Rectángulo','tool.ellipse':'Elipse','tool.triangle':'Triángulo',
+    'tool.arrow':'Flecha','tool.bucket':'Relleno','tool.eyedropper':'Cuentagotas','tool.text':'Texto','tool.stamp':'Sello',
+    'status.position':'Posición','status.zoom':'Zoom','status.canvas':'Lienzo','status.stroke':'Trazo','status.actions':'Acciones',
+    'status.saving':'Guardando…','status.saved':'Autoguardado ✓','status.nospace':'Sin autoguardado (espacio)',
+    'toast.cleared':'Lienzo limpiado · pulsa Ctrl+Z para recuperarlo',
+    'toast.noundo':'Nada que deshacer','toast.noredo':'Nada que rehacer',
+    'toast.samecolor':'Esa zona ya tiene ese color','toast.filled':'Zona rellenada',
+    'toast.transparent':'Zona transparente','toast.picked':'Color capturado: {c}',
+    'toast.bgTrans':'Fondo transparente activado (PNG con alfa)','toast.bgSolid':'Fondo sólido restaurado',
+    'toast.resized':'Lienzo redimensionado a {w} × {h}','toast.filtered':'Filtro aplicado',
+    'toast.transformed':'Lienzo transformado','toast.exported':'Imagen exportada como {f}',
+    'toast.notimage':'El archivo no es una imagen','toast.inserted':'Imagen insertada',
+    'toast.readfail':'No se pudo leer la imagen','toast.copied':'Imagen copiada al portapapeles',
+    'toast.nocopy':'Tu navegador no permite copiar imágenes',
+    'toast.noshare':'Compartir no está disponible en este navegador',
+    'toast.nopopup':'Permite las ventanas emergentes para imprimir',
+    'toast.restored':'Se restauró tu dibujo anterior · Ctrl+Z para empezar de cero',
+    'toast.welcome':'¡Bienvenido a PowerDraw 2.1! Pulsa «?» para ver los atajos',
+    'toast.langChanged':'Idioma cambiado a {l}',
+    'drop.label':'Suelta la imagen para insertarla',
+    'help.title':'🎨 PowerDraw 2.1 · Ayuda','help.shortcuts':'Atajos de teclado',
+    'help.undoRedo':'Deshacer / Rehacer','help.save':'Guardar imagen','help.open':'Abrir imagen',
+    'help.toolRow1':'Pincel · Borrador · Línea · Rectángulo','help.toolRow2':'Elipse · Texto · Relleno · Cuentagotas',
+    'help.thickness':'Grosor − / +','help.zoom':'Zoom − / + / Ajustar','help.grid':'Cuadrícula · Imán',
+    'help.fs':'Pantalla completa · Ayuda','help.gestures':'Gestos y trucos',
+    'help.gesturesText':'• Mantén <kbd>Shift</kbd> mientras dibujas una forma para proporciones perfectas.<br>• Mantén <kbd>Alt</kbd> para dibujar la forma desde su centro.<br>• Arrastra una imagen al lienzo o pégala con <kbd>Ctrl</kbd>+<kbd>V</kbd>.<br>• La simetría se aplica a <em>todas</em> las herramientas de trazo y forma.<br>• Todo se autoguarda en el navegador: al volver, tu dibujo seguirá ahí.'
+  },
 
-    colorPicker.addEventListener('input', () => {
-      if (currentTool === 'eraser') setBrushTool();
-    });
+  /* ---------------- ENGLISH ---------------- */
+  en: {
+    'app.title':'PowerDraw 2.1 · Drawing Studio',
+    'ui.tools':'Tools','ui.color':'Color','ui.colorStroke':'Stroke color',
+    'ui.recent':'Recent','ui.brush':'Brush','ui.thickness':'Thickness','ui.opacity':'Opacity',
+    'ui.pressure':'Pressure','ui.shapes':'Shapes & aids','ui.fill':'Fill','ui.grid':'Grid',
+    'ui.snap':'Snap','ui.symmetry':'Symmetry','ui.stamp':'Stamp','ui.canvas':'Canvas',
+    'ui.canvasSize':'Canvas size','ui.transparent':'α Background','ui.bgAlphaHint':'Transparent background (PNG with alpha)',
+    'ui.bgColor':'Background color','ui.zoomOut':'Zoom out (-)','ui.zoomIn':'Zoom in (+)','ui.fit':'Fit',
+    'ui.image':'Image','ui.rotL':'Rotate 90° left','ui.rotR':'Rotate 90° right',
+    'ui.flipH':'Flip horizontal','ui.flipV':'Flip vertical','ui.filters':'Filters…',
+    'ui.open':'Open image (Ctrl+O)','ui.paste':'Paste image from clipboard','ui.format':'Export format',
+    'ui.save':'Save','ui.saveHint':'Save (Ctrl+S)','ui.copy':'Copy','ui.copyHint':'Copy to clipboard',
+    'ui.share':'Share','ui.shareHint':'Share','ui.printHint':'Print','ui.clear':'Clear',
+    'ui.clearHint':'Clear canvas (undoable)','ui.undo':'Undo (Ctrl+Z)','ui.redo':'Redo (Ctrl+Y)',
+    'ui.theme':'Light / dark theme','ui.fullscreen':'Fullscreen (F)','ui.help':'Help & shortcuts (?)',
+    'ui.close':'Close','size.square':'1080 × 1080 (square)',
+    'sym.none':'No symmetry','sym.vertical':'Vertical mirror','sym.horizontal':'Horizontal mirror',
+    'sym.both':'4 mirrors','sym.radial4':'Radial ×4','sym.radial8':'Radial ×8','sym.kaleido':'Kaleidoscope',
+    'filter.grayscale':'Grayscale','filter.invert':'Invert colors','filter.sepia':'Sepia',
+    'filter.blur':'Blur','filter.saturate':'Saturate','filter.contrast':'High contrast',
+    'filter.brighten':'Brighten','filter.hue':'Hue rotate',
+    'tool.brush':'Brush','tool.pencil':'Pencil','tool.calligraphy':'Calligraphy','tool.highlighter':'Highlighter',
+    'tool.neon':'Neon','tool.rainbow':'Rainbow','tool.spray':'Spray','tool.eraser':'Eraser',
+    'tool.line':'Line','tool.rect':'Rectangle','tool.ellipse':'Ellipse','tool.triangle':'Triangle',
+    'tool.arrow':'Arrow','tool.bucket':'Fill','tool.eyedropper':'Eyedropper','tool.text':'Text','tool.stamp':'Stamp',
+    'status.position':'Position','status.zoom':'Zoom','status.canvas':'Canvas','status.stroke':'Stroke','status.actions':'Actions',
+    'status.saving':'Saving…','status.saved':'Autosaved ✓','status.nospace':'No autosave (storage full)',
+    'toast.cleared':'Canvas cleared · press Ctrl+Z to restore',
+    'toast.noundo':'Nothing to undo','toast.noredo':'Nothing to redo',
+    'toast.samecolor':'That area already has this color','toast.filled':'Area filled',
+    'toast.transparent':'Transparent area','toast.picked':'Color picked: {c}',
+    'toast.bgTrans':'Transparent background enabled (alpha PNG)','toast.bgSolid':'Solid background restored',
+    'toast.resized':'Canvas resized to {w} × {h}','toast.filtered':'Filter applied',
+    'toast.transformed':'Canvas transformed','toast.exported':'Image exported as {f}',
+    'toast.notimage':'File is not an image','toast.inserted':'Image inserted',
+    'toast.readfail':'Could not read the image','toast.copied':'Image copied to clipboard',
+    'toast.nocopy':'Your browser does not allow copying images',
+    'toast.noshare':'Sharing is not available in this browser',
+    'toast.nopopup':'Allow pop-ups to print',
+    'toast.restored':'Previous drawing restored · Ctrl+Z to start over',
+    'toast.welcome':'Welcome to PowerDraw 2.1! Press "?" for shortcuts',
+    'toast.langChanged':'Language changed to {l}',
+    'drop.label':'Drop the image to insert it',
+    'help.title':'🎨 PowerDraw 2.1 · Help','help.shortcuts':'Keyboard shortcuts',
+    'help.undoRedo':'Undo / Redo','help.save':'Save image','help.open':'Open image',
+    'help.toolRow1':'Brush · Eraser · Line · Rectangle','help.toolRow2':'Ellipse · Text · Fill · Eyedropper',
+    'help.thickness':'Thickness − / +','help.zoom':'Zoom − / + / Fit','help.grid':'Grid · Snap',
+    'help.fs':'Fullscreen · Help','help.gestures':'Gestures & tips',
+    'help.gesturesText':'• Hold <kbd>Shift</kbd> while drawing a shape for perfect proportions.<br>• Hold <kbd>Alt</kbd> to draw the shape from its center.<br>• Drag an image onto the canvas or paste it with <kbd>Ctrl</kbd>+<kbd>V</kbd>.<br>• Symmetry applies to <em>all</em> stroke and shape tools.<br>• Everything autosaves in the browser: your drawing will be there when you return.'
+  },
 
-    brushSize.addEventListener('input', (e) => {
-      sizeValue.textContent = e.target.value;
-    });
+  /* ---------------- PORTUGUÊS ---------------- */
+  pt: {
+    'app.title':'PowerDraw 2.1 · Estúdio de desenho',
+    'ui.tools':'Ferramentas','ui.color':'Cor','ui.colorStroke':'Cor do traço',
+    'ui.recent':'Recentes','ui.brush':'Pincel','ui.thickness':'Espessura','ui.opacity':'Opacidade',
+    'ui.pressure':'Pressão','ui.shapes':'Formas e ajudas','ui.fill':'Preenchimento','ui.grid':'Grade',
+    'ui.snap':'Ímã','ui.symmetry':'Simetria','ui.stamp':'Carimbo','ui.canvas':'Tela',
+    'ui.canvasSize':'Tamanho da tela','ui.transparent':'Fundo α','ui.bgAlphaHint':'Fundo transparente (PNG com alfa)',
+    'ui.bgColor':'Cor de fundo','ui.zoomOut':'Afastar (-)','ui.zoomIn':'Aproximar (+)','ui.fit':'Ajustar',
+    'ui.image':'Imagem','ui.rotL':'Girar 90° à esquerda','ui.rotR':'Girar 90° à direita',
+    'ui.flipH':'Inverter horizontal','ui.flipV':'Inverter vertical','ui.filters':'Filtros…',
+    'ui.open':'Abrir imagem (Ctrl+O)','ui.paste':'Colar imagem da área de transferência','ui.format':'Formato de exportação',
+    'ui.save':'Salvar','ui.saveHint':'Salvar (Ctrl+S)','ui.copy':'Copiar','ui.copyHint':'Copiar para a área de transferência',
+    'ui.share':'Compartilhar','ui.shareHint':'Compartilhar','ui.printHint':'Imprimir','ui.clear':'Limpar',
+    'ui.clearHint':'Limpar tela (pode desfazer)','ui.undo':'Desfazer (Ctrl+Z)','ui.redo':'Refazer (Ctrl+Y)',
+    'ui.theme':'Tema claro / escuro','ui.fullscreen':'Tela cheia (F)','ui.help':'Ajuda e atalhos (?)',
+    'ui.close':'Fechar','size.square':'1080 × 1080 (quadrado)',
+    'sym.none':'Sem simetria','sym.vertical':'Espelho vertical','sym.horizontal':'Espelho horizontal',
+    'sym.both':'4 espelhos','sym.radial4':'Radial ×4','sym.radial8':'Radial ×8','sym.kaleido':'Caleidoscópio',
+    'filter.grayscale':'Escala de cinza','filter.invert':'Inverter cores','filter.sepia':'Sépia',
+    'filter.blur':'Desfoque','filter.saturate':'Saturar','filter.contrast':'Alto contraste',
+    'filter.brighten':'Clarear','filter.hue':'Girar matiz',
+    'tool.brush':'Pincel','tool.pencil':'Lápis','tool.calligraphy':'Caligrafia','tool.highlighter':'Marcador',
+    'tool.neon':'Neon','tool.rainbow':'Arco-íris','tool.spray':'Spray','tool.eraser':'Borracha',
+    'tool.line':'Linha','tool.rect':'Retângulo','tool.ellipse':'Elipse','tool.triangle':'Triângulo',
+    'tool.arrow':'Seta','tool.bucket':'Preencher','tool.eyedropper':'Conta-gotas','tool.text':'Texto','tool.stamp':'Carimbo',
+    'status.position':'Posição','status.zoom':'Zoom','status.canvas':'Tela','status.stroke':'Traço','status.actions':'Ações',
+    'status.saving':'Salvando…','status.saved':'Salvo automaticamente ✓','status.nospace':'Sem salvamento (espaço)',
+    'toast.cleared':'Tela limpa · pressione Ctrl+Z para restaurar',
+    'toast.noundo':'Nada para desfazer','toast.noredo':'Nada para refazer',
+    'toast.samecolor':'Essa área já tem essa cor','toast.filled':'Área preenchida',
+    'toast.transparent':'Área transparente','toast.picked':'Cor capturada: {c}',
+    'toast.bgTrans':'Fundo transparente ativado (PNG com alfa)','toast.bgSolid':'Fundo sólido restaurado',
+    'toast.resized':'Tela redimensionada para {w} × {h}','toast.filtered':'Filtro aplicado',
+    'toast.transformed':'Tela transformada','toast.exported':'Imagem exportada como {f}',
+    'toast.notimage':'O arquivo não é uma imagem','toast.inserted':'Imagem inserida',
+    'toast.readfail':'Não foi possível ler a imagem','toast.copied':'Imagem copiada para a área de transferência',
+    'toast.nocopy':'Seu navegador não permite copiar imagens',
+    'toast.noshare':'Compartilhar não está disponível neste navegador',
+    'toast.nopopup':'Permita pop-ups para imprimir',
+    'toast.restored':'Desenho anterior restaurado · Ctrl+Z para começar de novo',
+    'toast.welcome':'Bem-vindo ao PowerDraw 2.1! Pressione "?" para atalhos',
+    'toast.langChanged':'Idioma alterado para {l}',
+    'drop.label':'Solte a imagem para inseri-la',
+    'help.title':'🎨 PowerDraw 2.1 · Ajuda','help.shortcuts':'Atalhos de teclado',
+    'help.undoRedo':'Desfazer / Refazer','help.save':'Salvar imagem','help.open':'Abrir imagem',
+    'help.toolRow1':'Pincel · Borracha · Linha · Retângulo','help.toolRow2':'Elipse · Texto · Preencher · Conta-gotas',
+    'help.thickness':'Espessura − / +','help.zoom':'Zoom − / + / Ajustar','help.grid':'Grade · Ímã',
+    'help.fs':'Tela cheia · Ajuda','help.gestures':'Gestos e dicas',
+    'help.gesturesText':'• Segure <kbd>Shift</kbd> ao desenhar uma forma para proporções perfeitas.<br>• Segure <kbd>Alt</kbd> para desenhar a partir do centro.<br>• Arraste uma imagem para a tela ou cole com <kbd>Ctrl</kbd>+<kbd>V</kbd>.<br>• A simetria se aplica a <em>todas</em> as ferramentas.<br>• Tudo é salvo automaticamente no navegador.'
+  },
 
-    brushBtn.addEventListener('click', setBrushTool);
-    eraserBtn.addEventListener('click', setEraserTool);
+  /* ---------------- FRANÇAIS ---------------- */
+  fr: {
+    'app.title':'PowerDraw 2.1 · Studio de dessin',
+    'ui.tools':'Outils','ui.color':'Couleur','ui.colorStroke':'Couleur du tracé',
+    'ui.recent':'Récentes','ui.brush':'Pinceau','ui.thickness':'Épaisseur','ui.opacity':'Opacité',
+    'ui.pressure':'Pression','ui.shapes':'Formes et aides','ui.fill':'Remplissage','ui.grid':'Grille',
+    'ui.snap':'Aimant','ui.symmetry':'Symétrie','ui.stamp':'Tampon','ui.canvas':'Toile',
+    'ui.canvasSize':'Taille de la toile','ui.transparent':'Fond α','ui.bgAlphaHint':'Fond transparent (PNG avec alpha)',
+    'ui.bgColor':'Couleur de fond','ui.zoomOut':'Zoom arrière (-)','ui.zoomIn':'Zoom avant (+)','ui.fit':'Ajuster',
+    'ui.image':'Image','ui.rotL':'Rotation 90° à gauche','ui.rotR':'Rotation 90° à droite',
+    'ui.flipH':'Retourner horizontalement','ui.flipV':'Retourner verticalement','ui.filters':'Filtres…',
+    'ui.open':'Ouvrir une image (Ctrl+O)','ui.paste':'Coller une image','ui.format':'Format d’export',
+    'ui.save':'Enregistrer','ui.saveHint':'Enregistrer (Ctrl+S)','ui.copy':'Copier','ui.copyHint':'Copier dans le presse-papiers',
+    'ui.share':'Partager','ui.shareHint':'Partager','ui.printHint':'Imprimer','ui.clear':'Effacer',
+    'ui.clearHint':'Effacer la toile (annulable)','ui.undo':'Annuler (Ctrl+Z)','ui.redo':'Rétablir (Ctrl+Y)',
+    'ui.theme':'Thème clair / sombre','ui.fullscreen':'Plein écran (F)','ui.help':'Aide et raccourcis (?)',
+    'ui.close':'Fermer','size.square':'1080 × 1080 (carré)',
+    'sym.none':'Sans symétrie','sym.vertical':'Miroir vertical','sym.horizontal':'Miroir horizontal',
+    'sym.both':'4 miroirs','sym.radial4':'Radial ×4','sym.radial8':'Radial ×8','sym.kaleido':'Kaléidoscope',
+    'filter.grayscale':'Niveaux de gris','filter.invert':'Inverser les couleurs','filter.sepia':'Sépia',
+    'filter.blur':'Flou','filter.saturate':'Saturer','filter.contrast':'Contraste élevé',
+    'filter.brighten':'Éclaircir','filter.hue':'Rotation de teinte',
+    'tool.brush':'Pinceau','tool.pencil':'Crayon','tool.calligraphy':'Calligraphie','tool.highlighter':'Surligneur',
+    'tool.neon':'Néon','tool.rainbow':'Arc-en-ciel','tool.spray':'Aérosol','tool.eraser':'Gomme',
+    'tool.line':'Ligne','tool.rect':'Rectangle','tool.ellipse':'Ellipse','tool.triangle':'Triangle',
+    'tool.arrow':'Flèche','tool.bucket':'Remplir','tool.eyedropper':'Pipette','tool.text':'Texte','tool.stamp':'Tampon',
+    'status.position':'Position','status.zoom':'Zoom','status.canvas':'Toile','status.stroke':'Tracé','status.actions':'Actions',
+    'status.saving':'Enregistrement…','status.saved':'Enregistré auto ✓','status.nospace':'Pas de sauvegarde (espace)',
+    'toast.cleared':'Toile effacée · Ctrl+Z pour restaurer',
+    'toast.noundo':'Rien à annuler','toast.noredo':'Rien à rétablir',
+    'toast.samecolor':'Cette zone a déjà cette couleur','toast.filled':'Zone remplie',
+    'toast.transparent':'Zone transparente','toast.picked':'Couleur capturée : {c}',
+    'toast.bgTrans':'Fond transparent activé (PNG alpha)','toast.bgSolid':'Fond uni restauré',
+    'toast.resized':'Toile redimensionnée à {w} × {h}','toast.filtered':'Filtre appliqué',
+    'toast.transformed':'Toile transformée','toast.exported':'Image exportée en {f}',
+    'toast.notimage':'Le fichier n’est pas une image','toast.inserted':'Image insérée',
+    'toast.readfail':'Impossible de lire l’image','toast.copied':'Image copiée dans le presse-papiers',
+    'toast.nocopy':'Votre navigateur ne permet pas de copier des images',
+    'toast.noshare':'Le partage n’est pas disponible dans ce navigateur',
+    'toast.nopopup':'Autorisez les pop-ups pour imprimer',
+    'toast.restored':'Dessin précédent restauré · Ctrl+Z pour recommencer',
+    'toast.welcome':'Bienvenue dans PowerDraw 2.1 ! Appuyez sur « ? » pour les raccourcis',
+    'toast.langChanged':'Langue changée en {l}',
+    'drop.label':'Déposez l’image pour l’insérer',
+    'help.title':'🎨 PowerDraw 2.1 · Aide','help.shortcuts':'Raccourcis clavier',
+    'help.undoRedo':'Annuler / Rétablir','help.save':'Enregistrer l’image','help.open':'Ouvrir une image',
+    'help.toolRow1':'Pinceau · Gomme · Ligne · Rectangle','help.toolRow2':'Ellipse · Texte · Remplir · Pipette',
+    'help.thickness':'Épaisseur − / +','help.zoom':'Zoom − / + / Ajuster','help.grid':'Grille · Aimant',
+    'help.fs':'Plein écran · Aide','help.gestures':'Gestes et astuces',
+    'help.gesturesText':'• Maintenez <kbd>Shift</kbd> pour des proportions parfaites.<br>• Maintenez <kbd>Alt</kbd> pour dessiner depuis le centre.<br>• Glissez une image sur la toile ou collez avec <kbd>Ctrl</kbd>+<kbd>V</kbd>.<br>• La symétrie s’applique à <em>tous</em> les outils.<br>• Tout est sauvegardé automatiquement dans le navigateur.'
+  },
 
-    function setBrushTool() {
-      currentTool = 'brush';
-      brushBtn.classList.add('active');
-      eraserBtn.classList.remove('active');
+  /* ---------------- DEUTSCH ---------------- */
+  de: {
+    'app.title':'PowerDraw 2.1 · Zeichenstudio',
+    'ui.tools':'Werkzeuge','ui.color':'Farbe','ui.colorStroke':'Strichfarbe',
+    'ui.recent':'Zuletzt','ui.brush':'Pinsel','ui.thickness':'Dicke','ui.opacity':'Deckkraft',
+    'ui.pressure':'Druck','ui.shapes':'Formen & Hilfen','ui.fill':'Füllung','ui.grid':'Raster',
+    'ui.snap':'Einrasten','ui.symmetry':'Symmetrie','ui.stamp':'Stempel','ui.canvas':'Leinwand',
+    'ui.canvasSize':'Leinwandgröße','ui.transparent':'α-Hintergrund','ui.bgAlphaHint':'Transparenter Hintergrund (PNG mit Alpha)',
+    'ui.bgColor':'Hintergrundfarbe','ui.zoomOut':'Verkleinern (-)','ui.zoomIn':'Vergrößern (+)','ui.fit':'Anpassen',
+    'ui.image':'Bild','ui.rotL':'90° nach links drehen','ui.rotR':'90° nach rechts drehen',
+    'ui.flipH':'Horizontal spiegeln','ui.flipV':'Vertikal spiegeln','ui.filters':'Filter…',
+    'ui.open':'Bild öffnen (Strg+O)','ui.paste':'Bild aus Zwischenablage einfügen','ui.format':'Exportformat',
+    'ui.save':'Speichern','ui.saveHint':'Speichern (Strg+S)','ui.copy':'Kopieren','ui.copyHint':'In Zwischenablage kopieren',
+    'ui.share':'Teilen','ui.shareHint':'Teilen','ui.printHint':'Drucken','ui.clear':'Leeren',
+    'ui.clearHint':'Leinwand leeren (rückgängig machbar)','ui.undo':'Rückgängig (Strg+Z)','ui.redo':'Wiederholen (Strg+Y)',
+    'ui.theme':'Helles / dunkles Thema','ui.fullscreen':'Vollbild (F)','ui.help':'Hilfe & Tastenkürzel (?)',
+    'ui.close':'Schließen','size.square':'1080 × 1080 (quadratisch)',
+    'sym.none':'Keine Symmetrie','sym.vertical':'Vertikaler Spiegel','sym.horizontal':'Horizontaler Spiegel',
+    'sym.both':'4 Spiegel','sym.radial4':'Radial ×4','sym.radial8':'Radial ×8','sym.kaleido':'Kaleidoskop',
+    'filter.grayscale':'Graustufen','filter.invert':'Farben invertieren','filter.sepia':'Sepia',
+    'filter.blur':'Weichzeichnen','filter.saturate':'Sättigen','filter.contrast':'Hoher Kontrast',
+    'filter.brighten':'Aufhellen','filter.hue':'Farbton drehen',
+    'tool.brush':'Pinsel','tool.pencil':'Bleistift','tool.calligraphy':'Kalligrafie','tool.highlighter':'Textmarker',
+    'tool.neon':'Neon','tool.rainbow':'Regenbogen','tool.spray':'Sprühdose','tool.eraser':'Radierer',
+    'tool.line':'Linie','tool.rect':'Rechteck','tool.ellipse':'Ellipse','tool.triangle':'Dreieck',
+    'tool.arrow':'Pfeil','tool.bucket':'Füllen','tool.eyedropper':'Pipette','tool.text':'Text','tool.stamp':'Stempel',
+    'status.position':'Position','status.zoom':'Zoom','status.canvas':'Leinwand','status.stroke':'Strich','status.actions':'Aktionen',
+    'status.saving':'Speichern…','status.saved':'Automatisch gespeichert ✓','status.nospace':'Kein Autospeichern (Speicher voll)',
+    'toast.cleared':'Leinwand geleert · Strg+Z zum Wiederherstellen',
+    'toast.noundo':'Nichts rückgängig zu machen','toast.noredo':'Nichts zu wiederholen',
+    'toast.samecolor':'Dieser Bereich hat bereits diese Farbe','toast.filled':'Bereich gefüllt',
+    'toast.transparent':'Transparenter Bereich','toast.picked':'Farbe aufgenommen: {c}',
+    'toast.bgTrans':'Transparenter Hintergrund aktiviert (Alpha-PNG)','toast.bgSolid':'Fester Hintergrund wiederhergestellt',
+    'toast.resized':'Leinwand auf {w} × {h} geändert','toast.filtered':'Filter angewendet',
+    'toast.transformed':'Leinwand transformiert','toast.exported':'Bild als {f} exportiert',
+    'toast.notimage':'Datei ist kein Bild','toast.inserted':'Bild eingefügt',
+    'toast.readfail':'Bild konnte nicht gelesen werden','toast.copied':'Bild in Zwischenablage kopiert',
+    'toast.nocopy':'Ihr Browser erlaubt das Kopieren von Bildern nicht',
+    'toast.noshare':'Teilen ist in diesem Browser nicht verfügbar',
+    'toast.nopopup':'Erlauben Sie Pop-ups zum Drucken',
+    'toast.restored':'Vorherige Zeichnung wiederhergestellt · Strg+Z zum Neustart',
+    'toast.welcome':'Willkommen bei PowerDraw 2.1! Drücken Sie „?“ für Tastenkürzel',
+    'toast.langChanged':'Sprache geändert zu {l}',
+    'drop.label':'Bild zum Einfügen hier ablegen',
+    'help.title':'🎨 PowerDraw 2.1 · Hilfe','help.shortcuts':'Tastenkürzel',
+    'help.undoRedo':'Rückgängig / Wiederholen','help.save':'Bild speichern','help.open':'Bild öffnen',
+    'help.toolRow1':'Pinsel · Radierer · Linie · Rechteck','help.toolRow2':'Ellipse · Text · Füllen · Pipette',
+    'help.thickness':'Dicke − / +','help.zoom':'Zoom − / + / Anpassen','help.grid':'Raster · Einrasten',
+    'help.fs':'Vollbild · Hilfe','help.gestures':'Gesten & Tipps',
+    'help.gesturesText':'• <kbd>Shift</kbd> gedrückt halten für perfekte Proportionen.<br>• <kbd>Alt</kbd> gedrückt halten, um von der Mitte aus zu zeichnen.<br>• Ziehen Sie ein Bild auf die Leinwand oder fügen Sie es mit <kbd>Strg</kbd>+<kbd>V</kbd> ein.<br>• Die Symmetrie gilt für <em>alle</em> Werkzeuge.<br>• Alles wird automatisch im Browser gespeichert.'
+  },
+
+  /* ---------------- ITALIANO ---------------- */
+  it: {
+    'app.title':'PowerDraw 2.1 · Studio di disegno',
+    'ui.tools':'Strumenti','ui.color':'Colore','ui.colorStroke':'Colore del tratto',
+    'ui.recent':'Recenti','ui.brush':'Pennello','ui.thickness':'Spessore','ui.opacity':'Opacità',
+    'ui.pressure':'Pressione','ui.shapes':'Forme e aiuti','ui.fill':'Riempimento','ui.grid':'Griglia',
+    'ui.snap':'Aggancio','ui.symmetry':'Simmetria','ui.stamp':'Timbro','ui.canvas':'Tela',
+    'ui.canvasSize':'Dimensione della tela','ui.transparent':'Sfondo α','ui.bgAlphaHint':'Sfondo trasparente (PNG con alfa)',
+    'ui.bgColor':'Colore di sfondo','ui.zoomOut':'Riduci (-)','ui.zoomIn':'Ingrandisci (+)','ui.fit':'Adatta',
+    'ui.image':'Immagine','ui.rotL':'Ruota 90° a sinistra','ui.rotR':'Ruota 90° a destra',
+    'ui.flipH':'Rifletti orizzontalmente','ui.flipV':'Rifletti verticalmente','ui.filters':'Filtri…',
+    'ui.open':'Apri immagine (Ctrl+O)','ui.paste':'Incolla immagine dagli appunti','ui.format':'Formato di esportazione',
+    'ui.save':'Salva','ui.saveHint':'Salva (Ctrl+S)','ui.copy':'Copia','ui.copyHint':'Copia negli appunti',
+    'ui.share':'Condividi','ui.shareHint':'Condividi','ui.printHint':'Stampa','ui.clear':'Pulisci',
+    'ui.clearHint':'Pulisci la tela (annullabile)','ui.undo':'Annulla (Ctrl+Z)','ui.redo':'Ripeti (Ctrl+Y)',
+    'ui.theme':'Tema chiaro / scuro','ui.fullscreen':'Schermo intero (F)','ui.help':'Aiuto e scorciatoie (?)',
+    'ui.close':'Chiudi','size.square':'1080 × 1080 (quadrato)',
+    'sym.none':'Nessuna simmetria','sym.vertical':'Specchio verticale','sym.horizontal':'Specchio orizzontale',
+    'sym.both':'4 specchi','sym.radial4':'Radiale ×4','sym.radial8':'Radiale ×8','sym.kaleido':'Caleidoscopio',
+    'filter.grayscale':'Scala di grigi','filter.invert':'Inverti colori','filter.sepia':'Seppia',
+    'filter.blur':'Sfocatura','filter.saturate':'Satura','filter.contrast':'Alto contrasto',
+    'filter.brighten':'Schiarisci','filter.hue':'Ruota tonalità',
+    'tool.brush':'Pennello','tool.pencil':'Matita','tool.calligraphy':'Calligrafia','tool.highlighter':'Evidenziatore',
+    'tool.neon':'Neon','tool.rainbow':'Arcobaleno','tool.spray':'Spray','tool.eraser':'Gomma',
+    'tool.line':'Linea','tool.rect':'Rettangolo','tool.ellipse':'Ellisse','tool.triangle':'Triangolo',
+    'tool.arrow':'Freccia','tool.bucket':'Riempi','tool.eyedropper':'Contagocce','tool.text':'Testo','tool.stamp':'Timbro',
+    'status.position':'Posizione','status.zoom':'Zoom','status.canvas':'Tela','status.stroke':'Tratto','status.actions':'Azioni',
+    'status.saving':'Salvataggio…','status.saved':'Salvato auto ✓','status.nospace':'Nessun salvataggio (spazio)',
+    'toast.cleared':'Tela pulita · premi Ctrl+Z per ripristinare',
+    'toast.noundo':'Niente da annullare','toast.noredo':'Niente da ripetere',
+    'toast.samecolor':'Quella zona ha già questo colore','toast.filled':'Zona riempita',
+    'toast.transparent':'Zona trasparente','toast.picked':'Colore catturato: {c}',
+    'toast.bgTrans':'Sfondo trasparente attivato (PNG con alfa)','toast.bgSolid':'Sfondo pieno ripristinato',
+    'toast.resized':'Tela ridimensionata a {w} × {h}','toast.filtered':'Filtro applicato',
+    'toast.transformed':'Tela trasformata','toast.exported':'Immagine esportata come {f}',
+    'toast.notimage':'Il file non è un’immagine','toast.inserted':'Immagine inserita',
+    'toast.readfail':'Impossibile leggere l’immagine','toast.copied':'Immagine copiata negli appunti',
+    'toast.nocopy':'Il tuo browser non consente di copiare immagini',
+    'toast.noshare':'La condivisione non è disponibile in questo browser',
+    'toast.nopopup':'Consenti i pop-up per stampare',
+    'toast.restored':'Disegno precedente ripristinato · Ctrl+Z per ricominciare',
+    'toast.welcome':'Benvenuto in PowerDraw 2.1! Premi «?» per le scorciatoie',
+    'toast.langChanged':'Lingua cambiata in {l}',
+    'drop.label':'Rilascia l’immagine per inserirla',
+    'help.title':'🎨 PowerDraw 2.1 · Aiuto','help.shortcuts':'Scorciatoie da tastiera',
+    'help.undoRedo':'Annulla / Ripeti','help.save':'Salva immagine','help.open':'Apri immagine',
+    'help.toolRow1':'Pennello · Gomma · Linea · Rettangolo','help.toolRow2':'Ellisse · Testo · Riempi · Contagocce',
+    'help.thickness':'Spessore − / +','help.zoom':'Zoom − / + / Adatta','help.grid':'Griglia · Aggancio',
+    'help.fs':'Schermo intero · Aiuto','help.gestures':'Gesti e trucchi',
+    'help.gesturesText':'• Tieni premuto <kbd>Shift</kbd> per proporzioni perfette.<br>• Tieni premuto <kbd>Alt</kbd> per disegnare dal centro.<br>• Trascina un’immagine sulla tela o incollala con <kbd>Ctrl</kbd>+<kbd>V</kbd>.<br>• La simmetria si applica a <em>tutti</em> gli strumenti.<br>• Tutto viene salvato automaticamente nel browser.'
+  },
+
+  /* ---------------- 日本語 ---------------- */
+  ja: {
+    'app.title':'PowerDraw 2.1 · お絵かきスタジオ',
+    'ui.tools':'ツール','ui.color':'色','ui.colorStroke':'線の色',
+    'ui.recent':'最近','ui.brush':'ブラシ','ui.thickness':'太さ','ui.opacity':'不透明度',
+    'ui.pressure':'筆圧','ui.shapes':'図形と補助','ui.fill':'塗りつぶし','ui.grid':'グリッド',
+    'ui.snap':'スナップ','ui.symmetry':'対称','ui.stamp':'スタンプ','ui.canvas':'キャンバス',
+    'ui.canvasSize':'キャンバスサイズ','ui.transparent':'α背景','ui.bgAlphaHint':'透明背景（アルファ付きPNG）',
+    'ui.bgColor':'背景色','ui.zoomOut':'縮小 (-)','ui.zoomIn':'拡大 (+)','ui.fit':'フィット',
+    'ui.image':'画像','ui.rotL':'左に90°回転','ui.rotR':'右に90°回転',
+    'ui.flipH':'左右反転','ui.flipV':'上下反転','ui.filters':'フィルター…',
+    'ui.open':'画像を開く (Ctrl+O)','ui.paste':'クリップボードから貼り付け','ui.format':'書き出し形式',
+    'ui.save':'保存','ui.saveHint':'保存 (Ctrl+S)','ui.copy':'コピー','ui.copyHint':'クリップボードにコピー',
+    'ui.share':'共有','ui.shareHint':'共有','ui.printHint':'印刷','ui.clear':'消去',
+    'ui.clearHint':'キャンバスを消去（元に戻せます）','ui.undo':'元に戻す (Ctrl+Z)','ui.redo':'やり直す (Ctrl+Y)',
+    'ui.theme':'ライト / ダークテーマ','ui.fullscreen':'全画面 (F)','ui.help':'ヘルプとショートカット (?)',
+    'ui.close':'閉じる','size.square':'1080 × 1080（正方形）',
+    'sym.none':'対称なし','sym.vertical':'左右ミラー','sym.horizontal':'上下ミラー',
+    'sym.both':'4方向ミラー','sym.radial4':'放射 ×4','sym.radial8':'放射 ×8','sym.kaleido':'万華鏡',
+    'filter.grayscale':'グレースケール','filter.invert':'色を反転','filter.sepia':'セピア',
+    'filter.blur':'ぼかし','filter.saturate':'彩度上げ','filter.contrast':'高コントラスト',
+    'filter.brighten':'明るく','filter.hue':'色相回転',
+    'tool.brush':'ブラシ','tool.pencil':'鉛筆','tool.calligraphy':'カリグラフィ','tool.highlighter':'マーカー',
+    'tool.neon':'ネオン','tool.rainbow':'虹','tool.spray':'スプレー','tool.eraser':'消しゴム',
+    'tool.line':'直線','tool.rect':'長方形','tool.ellipse':'楕円','tool.triangle':'三角形',
+    'tool.arrow':'矢印','tool.bucket':'塗りつぶし','tool.eyedropper':'スポイト','tool.text':'テキスト','tool.stamp':'スタンプ',
+    'status.position':'位置','status.zoom':'ズーム','status.canvas':'キャンバス','status.stroke':'線','status.actions':'操作',
+    'status.saving':'保存中…','status.saved':'自動保存 ✓','status.nospace':'保存不可（容量不足）',
+    'toast.cleared':'キャンバスを消去しました · Ctrl+Z で復元',
+    'toast.noundo':'元に戻すものがありません','toast.noredo':'やり直すものがありません',
+    'toast.samecolor':'その場所はすでにこの色です','toast.filled':'塗りつぶしました',
+    'toast.transparent':'透明な領域です','toast.picked':'色を取得: {c}',
+    'toast.bgTrans':'透明背景を有効にしました（アルファPNG）','toast.bgSolid':'背景を元に戻しました',
+    'toast.resized':'キャンバスを {w} × {h} に変更','toast.filtered':'フィルターを適用しました',
+    'toast.transformed':'キャンバスを変形しました','toast.exported':'画像を {f} で書き出しました',
+    'toast.notimage':'画像ファイルではありません','toast.inserted':'画像を挿入しました',
+    'toast.readfail':'画像を読み込めませんでした','toast.copied':'画像をクリップボードにコピーしました',
+    'toast.nocopy':'このブラウザは画像のコピーに対応していません',
+    'toast.noshare':'このブラウザでは共有できません',
+    'toast.nopopup':'印刷するにはポップアップを許可してください',
+    'toast.restored':'前回の続きを復元しました · Ctrl+Z で最初から',
+    'toast.welcome':'PowerDraw 2.1 へようこそ！「?」でショートカット',
+    'toast.langChanged':'言語を {l} に変更しました',
+    'drop.label':'画像をドロップして挿入',
+    'help.title':'🎨 PowerDraw 2.1 · ヘルプ','help.shortcuts':'キーボードショートカット',
+    'help.undoRedo':'元に戻す / やり直す','help.save':'画像を保存','help.open':'画像を開く',
+    'help.toolRow1':'ブラシ · 消しゴム · 直線 · 長方形','help.toolRow2':'楕円 · テキスト · 塗りつぶし · スポイト',
+    'help.thickness':'太さ − / +','help.zoom':'ズーム − / + / フィット','help.grid':'グリッド · スナップ',
+    'help.fs':'全画面 · ヘルプ','help.gestures':'操作とコツ',
+    'help.gesturesText':'• 図形を描くときは <kbd>Shift</kbd> で正比例に。<br>• <kbd>Alt</kbd> で中心から描画。<br>• 画像をキャンバスにドロップ、または <kbd>Ctrl</kbd>+<kbd>V</kbd> で貼り付け。<br>• 対称は<em>すべて</em>のツールに適用されます。<br>• すべてブラウザに自動保存されます。'
+  },
+
+  /* ---------------- 中文 ---------------- */
+  zh: {
+    'app.title':'PowerDraw 2.1 · 绘画工作室',
+    'ui.tools':'工具','ui.color':'颜色','ui.colorStroke':'笔触颜色',
+    'ui.recent':'最近','ui.brush':'画笔','ui.thickness':'粗细','ui.opacity':'不透明度',
+    'ui.pressure':'压感','ui.shapes':'形状与辅助','ui.fill':'填充','ui.grid':'网格',
+    'ui.snap':'吸附','ui.symmetry':'对称','ui.stamp':'印章','ui.canvas':'画布',
+    'ui.canvasSize':'画布尺寸','ui.transparent':'α 背景','ui.bgAlphaHint':'透明背景（带 alpha 的 PNG）',
+    'ui.bgColor':'背景颜色','ui.zoomOut':'缩小 (-)','ui.zoomIn':'放大 (+)','ui.fit':'适应',
+    'ui.image':'图像','ui.rotL':'向左旋转 90°','ui.rotR':'向右旋转 90°',
+    'ui.flipH':'水平翻转','ui.flipV':'垂直翻转','ui.filters':'滤镜…',
+    'ui.open':'打开图像 (Ctrl+O)','ui.paste':'从剪贴板粘贴图像','ui.format':'导出格式',
+    'ui.save':'保存','ui.saveHint':'保存 (Ctrl+S)','ui.copy':'复制','ui.copyHint':'复制到剪贴板',
+    'ui.share':'分享','ui.shareHint':'分享','ui.printHint':'打印','ui.clear':'清空',
+    'ui.clearHint':'清空画布（可撤销）','ui.undo':'撤销 (Ctrl+Z)','ui.redo':'重做 (Ctrl+Y)',
+    'ui.theme':'浅色 / 深色主题','ui.fullscreen':'全屏 (F)','ui.help':'帮助与快捷键 (?)',
+    'ui.close':'关闭','size.square':'1080 × 1080（正方形）',
+    'sym.none':'无对称','sym.vertical':'垂直镜像','sym.horizontal':'水平镜像',
+    'sym.both':'四向镜像','sym.radial4':'放射 ×4','sym.radial8':'放射 ×8','sym.kaleido':'万花筒',
+    'filter.grayscale':'灰度','filter.invert':'反色','filter.sepia':'褐色',
+    'filter.blur':'模糊','filter.saturate':'饱和','filter.contrast':'高对比',
+    'filter.brighten':'提亮','filter.hue':'色相旋转',
+    'tool.brush':'画笔','tool.pencil':'铅笔','tool.calligraphy':'书法','tool.highlighter':'荧光笔',
+    'tool.neon':'霓虹','tool.rainbow':'彩虹','tool.spray':'喷枪','tool.eraser':'橡皮',
+    'tool.line':'直线','tool.rect':'矩形','tool.ellipse':'椭圆','tool.triangle':'三角形',
+    'tool.arrow':'箭头','tool.bucket':'填充','tool.eyedropper':'吸管','tool.text':'文字','tool.stamp':'印章',
+    'status.position':'位置','status.zoom':'缩放','status.canvas':'画布','status.stroke':'笔触','status.actions':'操作',
+    'status.saving':'正在保存…','status.saved':'已自动保存 ✓','status.nospace':'无法自动保存（空间不足）',
+    'toast.cleared':'画布已清空 · 按 Ctrl+Z 恢复',
+    'toast.noundo':'没有可撤销的操作','toast.noredo':'没有可重做的操作',
+    'toast.samecolor':'该区域已经是这个颜色','toast.filled':'区域已填充',
+    'toast.transparent':'透明区域','toast.picked':'已取色: {c}',
+    'toast.bgTrans':'已启用透明背景（带 alpha 的 PNG）','toast.bgSolid':'已恢复纯色背景',
+    'toast.resized':'画布已调整为 {w} × {h}','toast.filtered':'已应用滤镜',
+    'toast.transformed':'画布已变换','toast.exported':'图像已导出为 {f}',
+    'toast.notimage':'该文件不是图像','toast.inserted':'图像已插入',
+    'toast.readfail':'无法读取图像','toast.copied':'图像已复制到剪贴板',
+    'toast.nocopy':'您的浏览器不允许复制图像',
+    'toast.noshare':'此浏览器不支持分享',
+    'toast.nopopup':'请允许弹出窗口以打印',
+    'toast.restored':'已恢复上次的绘画 · 按 Ctrl+Z 重新开始',
+    'toast.welcome':'欢迎使用 PowerDraw 2.1！按「?」查看快捷键',
+    'toast.langChanged':'语言已切换为 {l}',
+    'drop.label':'将图像拖放到此处插入',
+    'help.title':'🎨 PowerDraw 2.1 · 帮助','help.shortcuts':'键盘快捷键',
+    'help.undoRedo':'撤销 / 重做','help.save':'保存图像','help.open':'打开图像',
+    'help.toolRow1':'画笔 · 橡皮 · 直线 · 矩形','help.toolRow2':'椭圆 · 文字 · 填充 · 吸管',
+    'help.thickness':'粗细 − / +','help.zoom':'缩放 − / + / 适应','help.grid':'网格 · 吸附',
+    'help.fs':'全屏 · 帮助','help.gestures':'手势与技巧',
+    'help.gesturesText':'• 绘制形状时按住 <kbd>Shift</kbd> 可保持比例。<br>• 按住 <kbd>Alt</kbd> 从中心绘制。<br>• 将图像拖到画布或使用 <kbd>Ctrl</kbd>+<kbd>V</kbd> 粘贴。<br>• 对称适用于<em>所有</em>工具。<br>• 一切都会自动保存到浏览器。'
+  },
+
+  /* ---------------- РУССКИЙ ---------------- */
+  ru: {
+    'app.title':'PowerDraw 2.1 · Графическая студия',
+    'ui.tools':'Инструменты','ui.color':'Цвет','ui.colorStroke':'Цвет линии',
+    'ui.recent':'Недавние','ui.brush':'Кисть','ui.thickness':'Толщина','ui.opacity':'Непрозрачность',
+    'ui.pressure':'Нажим','ui.shapes':'Фигуры и помощь','ui.fill':'Заливка','ui.grid':'Сетка',
+    'ui.snap':'Привязка','ui.symmetry':'Симметрия','ui.stamp':'Штамп','ui.canvas':'Холст',
+    'ui.canvasSize':'Размер холста','ui.transparent':'α-фон','ui.bgAlphaHint':'Прозрачный фон (PNG с альфа)',
+    'ui.bgColor':'Цвет фона','ui.zoomOut':'Уменьшить (-)','ui.zoomIn':'Увеличить (+)','ui.fit':'По размеру',
+    'ui.image':'Изображение','ui.rotL':'Повернуть на 90° влево','ui.rotR':'Повернуть на 90° вправо',
+    'ui.flipH':'Отразить по горизонтали','ui.flipV':'Отразить по вертикали','ui.filters':'Фильтры…',
+    'ui.open':'Открыть изображение (Ctrl+O)','ui.paste':'Вставить изображение из буфера','ui.format':'Формат экспорта',
+    'ui.save':'Сохранить','ui.saveHint':'Сохранить (Ctrl+S)','ui.copy':'Копировать','ui.copyHint':'Копировать в буфер',
+    'ui.share':'Поделиться','ui.shareHint':'Поделиться','ui.printHint':'Печать','ui.clear':'Очистить',
+    'ui.clearHint':'Очистить холст (можно отменить)','ui.undo':'Отменить (Ctrl+Z)','ui.redo':'Повторить (Ctrl+Y)',
+    'ui.theme':'Светлая / тёмная тема','ui.fullscreen':'На весь экран (F)','ui.help':'Справка и горячие клавиши (?)',
+    'ui.close':'Закрыть','size.square':'1080 × 1080 (квадрат)',
+    'sym.none':'Без симметрии','sym.vertical':'Вертикальное зеркало','sym.horizontal':'Горизонтальное зеркало',
+    'sym.both':'4 зеркала','sym.radial4':'Радиальная ×4','sym.radial8':'Радиальная ×8','sym.kaleido':'Калейдоскоп',
+    'filter.grayscale':'Оттенки серого','filter.invert':'Инвертировать цвета','filter.sepia':'Сепия',
+    'filter.blur':'Размытие','filter.saturate':'Насыщенность','filter.contrast':'Высокий контраст',
+    'filter.brighten':'Осветлить','filter.hue':'Поворот тона',
+    'tool.brush':'Кисть','tool.pencil':'Карандаш','tool.calligraphy':'Каллиграфия','tool.highlighter':'Маркер',
+    'tool.neon':'Неон','tool.rainbow':'Радуга','tool.spray':'Аэрозоль','tool.eraser':'Ластик',
+    'tool.line':'Линия','tool.rect':'Прямоугольник','tool.ellipse':'Эллипс','tool.triangle':'Треугольник',
+    'tool.arrow':'Стрелка','tool.bucket':'Заливка','tool.eyedropper':'Пипетка','tool.text':'Текст','tool.stamp':'Штамп',
+    'status.position':'Позиция','status.zoom':'Масштаб','status.canvas':'Холст','status.stroke':'Линия','status.actions':'Действия',
+    'status.saving':'Сохранение…','status.saved':'Автосохранение ✓','status.nospace':'Без сохранения (нет места)',
+    'toast.cleared':'Холст очищен · Ctrl+Z для восстановления',
+    'toast.noundo':'Нечего отменять','toast.noredo':'Нечего повторять',
+    'toast.samecolor':'Эта область уже такого цвета','toast.filled':'Область залита',
+    'toast.transparent':'Прозрачная область','toast.picked':'Цвет выбран: {c}',
+    'toast.bgTrans':'Прозрачный фон включён (PNG с альфа)','toast.bgSolid':'Сплошной фон восстановлен',
+    'toast.resized':'Холст изменён на {w} × {h}','toast.filtered':'Фильтр применён',
+    'toast.transformed':'Холст преобразован','toast.exported':'Изображение экспортировано как {f}',
+    'toast.notimage':'Файл не является изображением','toast.inserted':'Изображение вставлено',
+    'toast.readfail':'Не удалось прочитать изображение','toast.copied':'Изображение скопировано в буфер',
+    'toast.nocopy':'Ваш браузер не позволяет копировать изображения',
+    'toast.noshare':'Обмен недоступен в этом браузере',
+    'toast.nopopup':'Разрешите всплывающие окна для печати',
+    'toast.restored':'Предыдущий рисунок восстановлен · Ctrl+Z чтобы начать заново',
+    'toast.welcome':'Добро пожаловать в PowerDraw 2.1! Нажмите «?» для подсказок',
+    'toast.langChanged':'Язык изменён на {l}',
+    'drop.label':'Перетащите изображение сюда',
+    'help.title':'🎨 PowerDraw 2.1 · Справка','help.shortcuts':'Горячие клавиши',
+    'help.undoRedo':'Отменить / Повторить','help.save':'Сохранить изображение','help.open':'Открыть изображение',
+    'help.toolRow1':'Кисть · Ластик · Линия · Прямоугольник','help.toolRow2':'Эллипс · Текст · Заливка · Пипетка',
+    'help.thickness':'Толщина − / +','help.zoom':'Масштаб − / + / По размеру','help.grid':'Сетка · Привязка',
+    'help.fs':'Полный экран · Справка','help.gestures':'Жесты и советы',
+    'help.gesturesText':'• Удерживайте <kbd>Shift</kbd> для точных пропорций.<br>• Удерживайте <kbd>Alt</kbd>, чтобы рисовать из центра.<br>• Перетащите изображение на холст или вставьте через <kbd>Ctrl</kbd>+<kbd>V</kbd>.<br>• Симметрия применяется ко <em>всем</em> инструментам.<br>• Всё автосохраняется в браузере.'
+  },
+
+  /* ---------------- العربية (RTL) ---------------- */
+  ar: {
+    'app.title':'باور درو 2.1 · استوديو الرسم',
+    'ui.tools':'الأدوات','ui.color':'اللون','ui.colorStroke':'لون الخط',
+    'ui.recent':'الأخيرة','ui.brush':'الفرشاة','ui.thickness':'السماكة','ui.opacity':'الشفافية',
+    'ui.pressure':'الضغط','ui.shapes':'الأشكال والمساعدات','ui.fill':'تعبئة','ui.grid':'الشبكة',
+    'ui.snap':'الالتقاط','ui.symmetry':'التناظر','ui.stamp':'الختم','ui.canvas':'اللوحة',
+    'ui.canvasSize':'حجم اللوحة','ui.transparent':'خلفية شفافة','ui.bgAlphaHint':'خلفية شفافة (PNG بألفا)',
+    'ui.bgColor':'لون الخلفية','ui.zoomOut':'تصغير (-)','ui.zoomIn':'تكبير (+)','ui.fit':'ملاءمة',
+    'ui.image':'صورة','ui.rotL':'تدوير 90° لليسار','ui.rotR':'تدوير 90° لليمين',
+    'ui.flipH':'قلب أفقي','ui.flipV':'قلب رأسي','ui.filters':'الفلاتر…',
+    'ui.open':'فتح صورة (Ctrl+O)','ui.paste':'لصق صورة من الحافظة','ui.format':'صيغة التصدير',
+    'ui.save':'حفظ','ui.saveHint':'حفظ (Ctrl+S)','ui.copy':'نسخ','ui.copyHint':'نسخ إلى الحافظة',
+    'ui.share':'مشاركة','ui.shareHint':'مشاركة','ui.printHint':'طباعة','ui.clear':'مسح',
+    'ui.clearHint':'مسح اللوحة (يمكن التراجع)','ui.undo':'تراجع (Ctrl+Z)','ui.redo':'إعادة (Ctrl+Y)',
+    'ui.theme':'المظهر الفاتح / الداكن','ui.fullscreen':'ملء الشاشة (F)','ui.help':'المساعدة والاختصارات (?)',
+    'ui.close':'إغلاق','size.square':'1080 × 1080 (مربع)',
+    'sym.none':'بدون تناظر','sym.vertical':'مرآة رأسية','sym.horizontal':'مرآة أفقية',
+    'sym.both':'4 مرايا','sym.radial4':'شعاعي ×4','sym.radial8':'شعاعي ×8','sym.kaleido':'مشكال',
+    'filter.grayscale':'تدرج رمادي','filter.invert':'عكس الألوان','filter.sepia':'سيبيا',
+    'filter.blur':'ضبابية','filter.saturate':'تشبع','filter.contrast':'تباين عالٍ',
+    'filter.brighten':'إضاءة','filter.hue':'تدوير الصبغة',
+    'tool.brush':'فرشاة','tool.pencil':'قلم رصاص','tool.calligraphy':'خط عربي','tool.highlighter':'قلم تحديد',
+    'tool.neon':'نيون','tool.rainbow':'قوس قزح','tool.spray':'رش','tool.eraser':'ممحاة',
+    'tool.line':'خط','tool.rect':'مستطيل','tool.ellipse':'بيضاوي','tool.triangle':'مثلث',
+    'tool.arrow':'سهم','tool.bucket':'تعبئة','tool.eyedropper':'قطارة','tool.text':'نص','tool.stamp':'ختم',
+    'status.position':'الموضع','status.zoom':'التكبير','status.canvas':'اللوحة','status.stroke':'الخط','status.actions':'الإجراءات',
+    'status.saving':'جارٍ الحفظ…','status.saved':'حفظ تلقائي ✓','status.nospace':'لا حفظ تلقائي (المساحة ممتلئة)',
+    'toast.cleared':'تم مسح اللوحة · اضغط Ctrl+Z للاستعادة',
+    'toast.noundo':'لا شيء للتراجع','toast.noredo':'لا شيء للإعادة',
+    'toast.samecolor':'هذه المنطقة بهذا اللون بالفعل','toast.filled':'تم تعبئة المنطقة',
+    'toast.transparent':'منطقة شفافة','toast.picked':'تم اختيار اللون: {c}',
+    'toast.bgTrans':'تم تفعيل الخلفية الشفافة (PNG بألفا)','toast.bgSolid':'تمت استعادة الخلفية الصلبة',
+    'toast.resized':'تم تغيير حجم اللوحة إلى {w} × {h}','toast.filtered':'تم تطبيق الفلتر',
+    'toast.transformed':'تم تحويل اللوحة','toast.exported':'تم تصدير الصورة كـ {f}',
+    'toast.notimage':'الملف ليس صورة','toast.inserted':'تم إدراج الصورة',
+    'toast.readfail':'تعذّر قراءة الصورة','toast.copied':'تم نسخ الصورة إلى الحافظة',
+    'toast.nocopy':'متصفحك لا يسمح بنسخ الصور',
+    'toast.noshare':'المشاركة غير متوفرة في هذا المتصفح',
+    'toast.nopopup':'اسمح بالنوافذ المنبثقة للطباعة',
+    'toast.restored':'تمت استعادة رسمك السابق · Ctrl+Z للبدء من جديد',
+    'toast.welcome':'مرحبًا بك في باور درو 2.1! اضغط «؟» للاختصارات',
+    'toast.langChanged':'تم تغيير اللغة إلى {l}',
+    'drop.label':'أفلت الصورة لإدراجها',
+    'help.title':'🎨 باور درو 2.1 · المساعدة','help.shortcuts':'اختصارات لوحة المفاتيح',
+    'help.undoRedo':'تراجع / إعادة','help.save':'حفظ الصورة','help.open':'فتح صورة',
+    'help.toolRow1':'فرشاة · ممحاة · خط · مستطيل','help.toolRow2':'بيضاوي · نص · تعبئة · قطارة',
+    'help.thickness':'السماكة − / +','help.zoom':'التكبير − / + / ملاءمة','help.grid':'الشبكة · الالتقاط',
+    'help.fs':'ملء الشاشة · المساعدة','help.gestures':'الإيماءات والنصائح',
+    'help.gesturesText':'• اضغط باستمرار <kbd>Shift</kbd> للحصول على نسب مثالية.<br>• اضغط <kbd>Alt</kbd> للرسم من المركز.<br>• اسحب صورة إلى اللوحة أو الصقها بـ <kbd>Ctrl</kbd>+<kbd>V</kbd>.<br>• ينطبق التناظر على <em>جميع</em> الأدوات.<br>• يتم الحفظ تلقائيًا في المتصفح.'
+  }
+};
+
+/* --- Estado del idioma activo --- */
+let lang = 'es';
+const STORAGE_LANG = 'powerdraw.lang';
+
+function t(key, vars) {
+  const dict = I18N[lang] || I18N.es;
+  let s = dict[key];
+  if (s === undefined) s = I18N.es[key] !== undefined ? I18N.es[key] : key;
+  if (vars) for (const k in vars) s = s.replace('{' + k + '}', vars[k]);
+  return s;
+}
+
+/** Aplica las traducciones a todos los nodos con data-i18n / data-i18n-title / data-i18n-html. */
+function applyTranslations() {
+  // Texto
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const k = el.getAttribute('data-i18n');
+    el.textContent = t(k);
+  });
+  // Atributo title
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+  });
+  // HTML interno (para kbd, em, etc.)
+  document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+  });
+  // Atributos aria-label de botones icon (fallback)
+  document.querySelectorAll('button.icon').forEach((b) => {
+    const title = b.getAttribute('data-i18n-title');
+    if (title) b.setAttribute('aria-label', t(title));
+  });
+  // Título del documento
+  document.title = t('app.title');
+  document.documentElement.lang = lang;
+  // Atributo data-drop-label del lienzo
+  const wrapEl = document.getElementById('canvasWrap');
+  if (wrapEl) wrapEl.setAttribute('data-drop-label', t('drop.label'));
+  // Etiquetas dinámicas
+  updateDynamicLabels();
+}
+
+/** Actualiza las etiquetas dinámicas (herramientas, status, etc.). */
+function updateDynamicLabels() {
+  // Herramientas (regeneradas por renderTools)
+  renderTools();
+  // Etiqueta de trazo en la barra de estado
+  const toolDef = TOOLS.find(x => x.id === state.tool);
+  if (toolDef) {
+    $('#brushLabel').textContent = t('tool.' + toolDef.id) + ' · ' + state.size + 'px';
+  }
+  // Estado de autoguardado
+  updateAutoStatus();
+}
+
+/** Genera los botones de herramientas según el idioma activo. */
+function renderTools() {
+  const box = $('#tools');
+  if (!box) return;
+  box.innerHTML = '';
+  TOOLS.forEach((tool) => {
+    const b = document.createElement('button');
+    b.className = 'tool-btn' + (tool.id === state.tool ? ' active' : '');
+    b.dataset.tool = tool.id;
+    const name = t('tool.' + tool.id);
+    b.title = name + (tool.key ? ` (${tool.key.toUpperCase()})` : '');
+    b.setAttribute('aria-label', name);
+    b.setAttribute('aria-pressed', String(tool.id === state.tool));
+    b.innerHTML = `<span class="ico">${tool.icon}</span><span class="lbl">${name}</span>`;
+    b.addEventListener('click', () => setTool(tool.id));
+    box.appendChild(b);
+  });
+}
+
+/** Cambia el idioma activo y refresca la UI. */
+function setLanguage(code) {
+  if (!I18N[code]) code = 'es';
+  lang = code;
+  try { localStorage.setItem(STORAGE_LANG, code); } catch (_) {}
+  const info = LANGUAGES.find(l => l.code === code) || LANGUAGES[0];
+  document.documentElement.dir = info.dir;
+  document.documentElement.lang = code;
+  applyTranslations();
+  const sel = $('#langSel');
+  if (sel) sel.value = code;
+  toast(t('toast.langChanged', { l: info.label }), 'success', 1800);
+}
+
+/* ============================================================================
+   RESTO DE LA APLICACIÓN
+   ========================================================================== */
+
+/* --- Utilidades --- */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+
+function toast(msg, type = 'info', ms = 2600) {
+  const box = $('#toasts');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity .3s, transform .3s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(20px)';
+    setTimeout(() => el.remove(), 320);
+  }, ms);
+}
+
+const hexToRgb = (hex) => {
+  const h = hex.replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+};
+const rgbToHex = (r, g, b) =>
+  '#' + [r, g, b].map(v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, '0')).join('');
+
+/* --- Lienzos y capas --- */
+const canvas  = $('#paintCanvas');
+const ctx     = canvas.getContext('2d');
+const overlay = $('#overlayCanvas');
+const octx    = overlay.getContext('2d');
+
+let W = canvas.width;
+let H = canvas.height;
+
+function makeLayer() {
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  return c;
+}
+const baseCanvas   = makeLayer();  const baseCtx   = baseCanvas.getContext('2d');
+const strokeCanvas = makeLayer();  const strokeCtx = strokeCanvas.getContext('2d');
+const tempCanvas   = makeLayer();  const tempCtx   = tempCanvas.getContext('2d');
+
+/* --- Estado --- */
+const state = {
+  tool: 'brush', color: '#111111', bg: '#ffffff', transparentBg: false,
+  size: 8, opacity: 1, pressure: true, fill: false,
+  symmetry: 'none', grid: false, snap: false,
+  zoom: 1, autoFit: true, recent: [], strokes: 0
+};
+
+const PALETTE = [
+  '#111111', '#ffffff', '#7f8c8d', '#c0392b',
+  '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71',
+  '#16a085', '#3498db', '#2980b9', '#9b59b6',
+  '#8e44ad', '#e84393', '#795548', '#34495e'
+];
+
+const TOOLS = [
+  { id:'brush',       icon:'🖌️', key:'b', free:true },
+  { id:'pencil',      icon:'✏️', key:'n', free:true },
+  { id:'calligraphy', icon:'🖋️', free:true },
+  { id:'highlighter', icon:'🖍️', free:true },
+  { id:'neon',        icon:'✨', free:true },
+  { id:'rainbow',     icon:'🌈', free:true },
+  { id:'spray',       icon:'💨', free:true },
+  { id:'eraser',      icon:'🧽', key:'e', free:true },
+  { id:'line',        icon:'📏', key:'l', shape:true },
+  { id:'rect',        icon:'▭',  key:'r', shape:true },
+  { id:'ellipse',     icon:'⬭',  key:'o', shape:true },
+  { id:'triangle',    icon:'△',  shape:true },
+  { id:'arrow',       icon:'➜',  shape:true },
+  { id:'bucket',      icon:'🪣', key:'g' },
+  { id:'eyedropper',  icon:'💧', key:'i' },
+  { id:'text',        icon:'🅰️', key:'t' },
+  { id:'stamp',       icon:'⭐' }
+];
+const isFree  = (tl) => !!TOOLS.find(x => x.id === tl)?.free;
+const isShape = (tl) => !!TOOLS.find(x => x.id === tl)?.shape;
+
+/* --- Fondo --- */
+function paintBackground() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, W, H);
+  if (!state.transparentBg) {
+    ctx.fillStyle = state.bg;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+function clearCanvas() {
+  paintBackground();
+  pushHistory();
+  toast(t('toast.cleared'), 'success');
+}
+
+/* --- Historial --- */
+const history = { stack: [], index: -1, max: 30 };
+
+function pushHistory() {
+  try {
+    const url = canvas.toDataURL('image/png');
+    history.stack = history.stack.slice(0, history.index + 1);
+    history.stack.push(url);
+    if (history.stack.length > history.max) history.stack.shift();
+    history.index = history.stack.length - 1;
+  } catch (e) { console.warn('History snapshot failed', e); }
+  state.strokes++;
+  $('#strokeCount').textContent = state.strokes;
+  refreshHistoryButtons();
+  scheduleAutosave();
+}
+function refreshHistoryButtons() {
+  $('#undoBtn').disabled = history.index <= 0;
+  $('#redoBtn').disabled = history.index >= history.stack.length - 1;
+}
+function restoreSnapshot(url) {
+  const img = new Image();
+  img.onload = () => {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(img, 0, 0);
+    scheduleAutosave();
+  };
+  img.src = url;
+}
+function undo() {
+  if (history.index <= 0) { toast(t('toast.noundo'), 'warn', 1400); return; }
+  history.index--; restoreSnapshot(history.stack[history.index]); refreshHistoryButtons();
+}
+function redo() {
+  if (history.index >= history.stack.length - 1) { toast(t('toast.noredo'), 'warn', 1400); return; }
+  history.index++; restoreSnapshot(history.stack[history.index]); refreshHistoryButtons();
+}
+
+/* --- Simetría --- */
+const ID = [1, 0, 0, 1, 0, 0];
+function rotM(cx, cy, deg) {
+  const r = deg * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+  return [c, s, -s, c, cx - c * cx + s * cy, cy - s * cx - c * cy];
+}
+const mirX = (cx) => [-1, 0, 0, 1, 2 * cx, 0];
+const mirY = (cy) => [1, 0, 0, -1, 0, 2 * cy];
+function mulM(a, b) {
+  return [
+    a[0]*b[0] + a[2]*b[1],  a[1]*b[0] + a[3]*b[1],
+    a[0]*b[2] + a[2]*b[3],  a[1]*b[2] + a[3]*b[3],
+    a[0]*b[4] + a[2]*b[5] + a[4],
+    a[1]*b[4] + a[3]*b[5] + a[5]
+  ];
+}
+function symmetryMatrices() {
+  const cx = W / 2, cy = H / 2;
+  switch (state.symmetry) {
+    case 'vertical':   return [ID, mirX(cx)];
+    case 'horizontal': return [ID, mirY(cy)];
+    case 'both':       return [ID, mirX(cx), mirY(cy), mulM(mirX(cx), mirY(cy))];
+    case 'radial4':    return [0, 90, 180, 270].map(d => rotM(cx, cy, d));
+    case 'radial8':    return [0, 45, 90, 135, 180, 225, 270, 315].map(d => rotM(cx, cy, d));
+    case 'kaleido': {
+      const out = [];
+      for (let d = 0; d < 360; d += 45) {
+        const r = rotM(cx, cy, d);
+        out.push(r, mulM(r, mirX(cx)));
+      }
+      return out;
     }
+    default: return [ID];
+  }
+}
+function withSymmetry(fn) {
+  for (const m of symmetryMatrices()) {
+    strokeCtx.save();
+    strokeCtx.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
+    fn(strokeCtx);
+    strokeCtx.restore();
+  }
+}
 
-    function setEraserTool() {
-      currentTool = 'eraser';
-      eraserBtn.classList.add('active');
-      brushBtn.classList.remove('active');
+/* --- Estilos de trazo --- */
+function applyStrokeStyle(g, pressure = 1) {
+  const tl = state.tool;
+  let lw = state.size;
+  if (state.pressure && pressure !== 1) lw = state.size * (0.4 + 1.2 * pressure);
+
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  g.lineWidth = lw;
+  g.strokeStyle = state.color;
+  g.fillStyle = state.color;
+  g.globalAlpha = 1;
+  g.shadowBlur = 0; g.shadowColor = 'transparent';
+
+  switch (tl) {
+    case 'pencil':      g.lineCap='butt'; g.lineJoin='miter'; g.lineWidth = Math.max(1, lw*0.6); break;
+    case 'calligraphy': g.lineCap='square'; g.lineJoin='round'; g.lineWidth = lw*1.4; break;
+    case 'highlighter': g.lineCap='square'; g.lineJoin='bevel'; g.lineWidth = lw*2.5; break;
+    case 'neon':        g.shadowBlur = lw*1.8; g.shadowColor = state.color; g.lineWidth = lw*0.9; break;
+    case 'rainbow':     g.strokeStyle = `hsl(${hue},100%,52%)`; g.fillStyle = g.strokeStyle; break;
+    case 'eraser':      g.strokeStyle = state.transparentBg ? '#000' : state.bg; g.fillStyle = g.strokeStyle; break;
+  }
+}
+
+/* --- Motor de dibujo --- */
+let drawing = false;
+let startPt = null;
+let lastPt  = null;
+let points  = [];
+let hue     = 0;
+let activePointer = null;
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  let x = (e.clientX - r.left) * (canvas.width / r.width);
+  let y = (e.clientY - r.top) * (canvas.height / r.height);
+  if (state.snap) { const g = 20; x = Math.round(x/g)*g; y = Math.round(y/g)*g; }
+  return { x, y };
+}
+
+function prepareLayers() {
+  baseCtx.setTransform(1, 0, 0, 1, 0, 0);
+  baseCtx.globalAlpha = 1; baseCtx.globalCompositeOperation = 'source-over';
+  baseCtx.clearRect(0, 0, W, H);
+  baseCtx.drawImage(canvas, 0, 0);
+  strokeCtx.setTransform(1, 0, 0, 1, 0, 0);
+  strokeCtx.globalAlpha = 1; strokeCtx.globalCompositeOperation = 'source-over';
+  strokeCtx.clearRect(0, 0, W, H);
+}
+
+function strokeAlpha() {
+  if (state.tool === 'highlighter') return Math.min(1, state.opacity * 0.45);
+  if (state.tool === 'neon')        return Math.min(1, state.opacity * 0.95);
+  return state.opacity;
+}
+
+function composite() {
+  const erase = state.tool === 'eraser' && state.transparentBg;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(baseCanvas, 0, 0);
+  ctx.globalAlpha = strokeAlpha();
+  ctx.globalCompositeOperation = erase ? 'destination-out' : 'source-over';
+  ctx.drawImage(strokeCanvas, 0, 0);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+}
+
+function paintSegment(seg, pressure = 1) {
+  if (state.tool === 'spray') { paintSpray(seg); return; }
+  withSymmetry((g) => {
+    applyStrokeStyle(g, pressure);
+    g.beginPath();
+    if (seg.type === 'dot') {
+      g.arc(seg.x, seg.y, Math.max(0.4, g.lineWidth / 2), 0, Math.PI * 2);
+      g.fill();
+      if (state.tool === 'neon') {
+        g.save(); g.shadowBlur = 0; g.fillStyle = '#fff';
+        g.beginPath();
+        g.arc(seg.x, seg.y, Math.max(0.3, g.lineWidth * 0.18), 0, Math.PI * 2);
+        g.fill(); g.restore();
+      }
+      return;
     }
-
-    function getMousePos(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-      const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-      };
+    if (seg.type === 'line') {
+      g.moveTo(seg.x1, seg.y1); g.lineTo(seg.x2, seg.y2);
+    } else {
+      g.moveTo(seg.mx1, seg.my1);
+      g.quadraticCurveTo(seg.cx, seg.cy, seg.mx2, seg.my2);
     }
+    g.stroke();
+    if (state.tool === 'neon') {
+      g.save(); g.shadowBlur = 0;
+      g.strokeStyle = '#ffffff';
+      g.lineWidth = Math.max(0.6, g.lineWidth * 0.3);
+      g.globalAlpha = 0.9; g.stroke(); g.restore();
+    }
+  });
+}
 
-    function startDrawing(e) {
-      isDrawing = true;
-      const pos = getMousePos(e);
-      lastX = pos.x;
-      lastY = pos.y;
+function paintSpray(seg) {
+  const p = seg.type === 'dot' ? seg : { x: seg.x2, y: seg.y2 };
+  const radius = state.size * 1.6;
+  const count = Math.max(4, Math.round(state.size * 0.9));
+  withSymmetry((g) => {
+    applyStrokeStyle(g);
+    g.fillStyle = state.color;
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const d = Math.sqrt(Math.random()) * radius;
+      g.beginPath();
+      g.arc(p.x + Math.cos(a)*d, p.y + Math.sin(a)*d,
+            Math.max(0.4, state.size * 0.07), 0, Math.PI * 2);
+      g.fill();
+    }
+  });
+}
+
+/* --- Formas --- */
+function shapeGeometry(start, cur, e) {
+  let x0 = start.x, y0 = start.y, x1 = cur.x, y1 = cur.y;
+  let dx = x1 - x0, dy = y1 - y0;
+  if (e.shiftKey) {
+    if (state.tool === 'line' || state.tool === 'arrow') {
+      const ang = Math.round(Math.atan2(dy, dx) / (Math.PI/4)) * (Math.PI/4);
+      const len = Math.hypot(dx, dy);
+      x1 = x0 + Math.cos(ang) * len;
+      y1 = y0 + Math.sin(ang) * len;
+    } else {
+      const s = Math.max(Math.abs(dx), Math.abs(dy));
+      x1 = x0 + Math.sign(dx || 1) * s;
+      y1 = y0 + Math.sign(dy || 1) * s;
+    }
+    dx = x1 - x0; dy = y1 - y0;
+  }
+  if (e.altKey) { x0 -= dx; y0 -= dy; }
+  return { x0, y0, x1, y1 };
+}
+
+function pathShape(g, geo) {
+  const { x0, y0, x1, y1 } = geo;
+  const w = x1 - x0, h = y1 - y0;
+  const fill = state.fill;
+  switch (state.tool) {
+    case 'line':
+      g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); break;
+    case 'rect':
+      g.beginPath(); g.rect(x0, y0, w, h);
+      fill ? g.fill() : g.stroke(); break;
+    case 'ellipse':
+      g.beginPath();
+      g.ellipse(x0 + w/2, y0 + h/2, Math.abs(w/2), Math.abs(h/2), 0, 0, Math.PI*2);
+      fill ? g.fill() : g.stroke(); break;
+    case 'triangle':
+      g.beginPath();
+      g.moveTo(x0 + w/2, y0); g.lineTo(x1, y1); g.lineTo(x0, y1); g.closePath();
+      fill ? g.fill() : g.stroke(); break;
+    case 'arrow': {
+      const head = Math.max(10, state.size * 2.4);
+      const ang = Math.atan2(h, w);
+      g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+      g.beginPath();
+      g.moveTo(x1, y1);
+      g.lineTo(x1 - head*Math.cos(ang - Math.PI/7), y1 - head*Math.sin(ang - Math.PI/7));
+      g.moveTo(x1, y1);
+      g.lineTo(x1 - head*Math.cos(ang + Math.PI/7), y1 - head*Math.sin(ang + Math.PI/7));
+      g.stroke();
+      break;
+    }
+  }
+}
+function paintShape(geo) {
+  withSymmetry((g) => { applyStrokeStyle(g); pathShape(g, geo); });
+}
+
+/* --- Relleno (flood fill) --- */
+function bucketFill(p) {
+  const x0 = Math.floor(p.x), y0 = Math.floor(p.y);
+  if (x0 < 0 || y0 < 0 || x0 >= W || y0 >= H) return;
+  const img = ctx.getImageData(0, 0, W, H);
+  const d = img.data;
+  const idx = (y0 * W + x0) * 4;
+  const target = [d[idx], d[idx+1], d[idx+2], d[idx+3]];
+  const { r, g, b } = hexToRgb(state.color);
+  const fill = [r, g, b, 255];
+  const tol = 40;
+  if (Math.abs(target[0]-r) < 4 && Math.abs(target[1]-g) < 4 &&
+      Math.abs(target[2]-b) < 4 && Math.abs(target[3]-255) < 4) {
+    toast(t('toast.samecolor'), 'warn', 1600); return;
+  }
+  const match = (i) =>
+    Math.abs(d[i]-target[0]) <= tol && Math.abs(d[i+1]-target[1]) <= tol &&
+    Math.abs(d[i+2]-target[2]) <= tol && Math.abs(d[i+3]-target[3]) <= tol;
+  const set = (i) => { d[i]=fill[0]; d[i+1]=fill[1]; d[i+2]=fill[2]; d[i+3]=fill[3]; };
+  const stack = [[x0, y0]];
+  while (stack.length) {
+    let [x, y] = stack.pop();
+    let i = (y * W + x) * 4;
+    if (!match(i)) continue;
+    let left = x, right = x;
+    while (left > 0 && match(((y*W) + left - 1) * 4)) left--;
+    while (right < W-1 && match(((y*W) + right + 1) * 4)) right--;
+    for (let xx = left; xx <= right; xx++) {
+      const ii = (y*W + xx) * 4;
+      set(ii);
+      if (y > 0)     { const up = ((y-1)*W + xx)*4; if (match(up)) stack.push([xx, y-1]); }
+      if (y < H-1)   { const dn = ((y+1)*W + xx)*4; if (match(dn)) stack.push([xx, y+1]); }
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  pushHistory();
+  toast(t('toast.filled'), 'success', 1500);
+}
+
+/* --- Cuentagotas --- */
+function pickColor(p) {
+  const x = clamp(Math.floor(p.x), 0, W-1);
+  const y = clamp(Math.floor(p.y), 0, H-1);
+  const d = ctx.getImageData(x, y, 1, 1).data;
+  if (d[3] === 0) { toast(t('toast.transparent'), 'warn', 1500); return; }
+  setColor(rgbToHex(d[0], d[1], d[2]));
+  toast(t('toast.picked', { c: state.color }), 'success', 1500);
+}
+
+/* --- Texto --- */
+let textInput = null;
+function askText(p) {
+  if (textInput) return;
+  const wrapEl = $('#canvasWrap');
+  const r = canvas.getBoundingClientRect();
+  const scale = r.width / canvas.width;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'text-input';
+  input.style.left = (p.x * scale) + 'px';
+  input.style.top  = (p.y * scale) + 'px';
+  input.style.fontSize = Math.max(13, state.size * 3 * scale) + 'px';
+  input.style.color = state.color;
+  wrapEl.appendChild(input);
+  input.focus();
+  textInput = input;
+  let done = false;
+  const finish = (commit) => {
+    if (done) return;
+    done = true;
+    const value = input.value;
+    input.remove();
+    textInput = null;
+    if (commit && value.trim()) drawText(value, p);
+  };
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter')  { ev.preventDefault(); finish(true); }
+    if (ev.key === 'Escape') { ev.preventDefault(); finish(false); }
+  });
+  input.addEventListener('blur', () => finish(true));
+}
+function drawText(text, p) {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.font = `${Math.round(state.size * 3)}px 'Segoe UI','Noto Sans',sans-serif`;
+  ctx.fillStyle = state.color;
+  ctx.textBaseline = 'top';
+  ctx.fillText(text, p.x, p.y);
+  ctx.restore();
+  pushHistory();
+}
+
+/* --- Sello --- */
+function stampAt(p) {
+  const emoji = $('#stampSel').value;
+  const size = Math.max(16, state.size * 4);
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = state.opacity;
+  ctx.font = `${size}px serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(emoji, p.x, p.y);
+  ctx.restore();
+  pushHistory();
+}
+
+/* --- Eventos de puntero --- */
+function onPointerDown(e) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  if (activePointer !== null) return;
+  const p = getPos(e);
+  const tl = state.tool;
+  if (tl === 'eyedropper') { pickColor(p); return; }
+  if (tl === 'bucket')     { bucketFill(p); return; }
+  if (tl === 'text')       { askText(p); return; }
+  if (tl === 'stamp')      { stampAt(p); return; }
+  activePointer = e.pointerId;
+  try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+  drawing = true;
+  startPt = lastPt = p;
+  points = [p];
+  prepareLayers();
+  if (isShape(tl)) {
+    paintShape({ x0: p.x, y0: p.y, x1: p.x, y1: p.y });
+  } else {
+    paintSegment({ type: 'dot', x: p.x, y: p.y }, pressureOf(e));
+  }
+  composite();
+  e.preventDefault();
+}
+function pressureOf(e) {
+  if (!state.pressure) return 1;
+  if (e.pointerType !== 'pen') return 1;
+  return e.pressure > 0 ? e.pressure : 0.5;
+}
+function onPointerMove(e) {
+  const p = getPos(e);
+  $('#coords').textContent = `${Math.round(p.x)}, ${Math.round(p.y)}`;
+  if (!drawing) { drawOverlay(p); return; }
+  if (e.pointerId !== activePointer) return;
+  if (isShape(state.tool)) {
+    const geo = shapeGeometry(startPt, p, e);
+    strokeCtx.setTransform(1, 0, 0, 1, 0, 0);
+    strokeCtx.clearRect(0, 0, W, H);
+    paintShape(geo);
+    composite();
+    return;
+  }
+  points.push(p);
+  const n = points.length;
+  if (state.tool === 'rainbow') hue = (hue + 4) % 360;
+  if (n === 2) {
+    paintSegment({ type:'line', x1: points[0].x, y1: points[0].y, x2: p.x, y2: p.y }, pressureOf(e));
+  } else {
+    const p0 = points[n-3], p1 = points[n-2], p2 = points[n-1];
+    const m1 = mid(p0, p1), m2 = mid(p1, p2);
+    paintSegment({ type:'quad', mx1:m1.x, my1:m1.y, cx:p1.x, cy:p1.y, mx2:m2.x, my2:m2.y }, pressureOf(e));
+  }
+  lastPt = p;
+  composite();
+  e.preventDefault();
+}
+function onPointerUp(e) {
+  if (!drawing || e.pointerId !== activePointer) return;
+  drawing = false;
+  activePointer = null;
+  try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+  if (!isShape(state.tool) && points.length >= 2) {
+    const a = points[points.length-2], b = points[points.length-1];
+    const m = mid(a, b);
+    paintSegment({ type:'line', x1:m.x, y1:m.y, x2:b.x, y2:b.y }, 1);
+  }
+  composite();
+  pushHistory();
+}
+canvas.addEventListener('pointerdown', onPointerDown);
+canvas.addEventListener('pointermove', onPointerMove);
+canvas.addEventListener('pointerup', onPointerUp);
+canvas.addEventListener('pointercancel', onPointerUp);
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+/* --- Capa superpuesta --- */
+function drawOverlay(cursor) {
+  octx.setTransform(1, 0, 0, 1, 0, 0);
+  octx.clearRect(0, 0, W, H);
+  if (state.grid) {
+    octx.strokeStyle = 'rgba(120,130,140,.35)';
+    octx.lineWidth = 1;
+    const step = 40;
+    octx.beginPath();
+    for (let x = step; x < W; x += step) { octx.moveTo(x, 0); octx.lineTo(x, H); }
+    for (let y = step; y < H; y += step) { octx.moveTo(0, y); octx.lineTo(W, y); }
+    octx.stroke();
+    octx.strokeStyle = 'rgba(9,105,218,.35)';
+    octx.beginPath();
+    octx.moveTo(W/2, 0); octx.lineTo(W/2, H);
+    octx.moveTo(0, H/2); octx.lineTo(W, H/2);
+    octx.stroke();
+  }
+  if (cursor && (isFree(state.tool) || isShape(state.tool))) {
+    const r = Math.max(3, state.size / 2);
+    octx.beginPath(); octx.arc(cursor.x, cursor.y, r, 0, Math.PI * 2);
+    octx.strokeStyle = 'rgba(0,0,0,.65)'; octx.lineWidth = 1; octx.stroke();
+    octx.beginPath(); octx.arc(cursor.x, cursor.y, r + 1, 0, Math.PI * 2);
+    octx.strokeStyle = 'rgba(255,255,255,.75)'; octx.stroke();
+  }
+}
+
+/* --- Herramientas (setter) --- */
+function setTool(id) {
+  state.tool = id;
+  $$('.tool-btn').forEach((b) => {
+    const on = b.dataset.tool === id;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+  $('#brushLabel').textContent = t('tool.' + id) + ' · ' + state.size + 'px';
+  drawOverlay();
+}
+
+/* --- Paleta --- */
+const paletteBox = $('#palette');
+PALETTE.forEach((c) => {
+  const s = document.createElement('button');
+  s.className = 'swatch';
+  s.style.background = c;
+  s.title = c;
+  s.setAttribute('aria-label', c);
+  s.addEventListener('click', () => setColor(c));
+  paletteBox.appendChild(s);
+});
+function setColor(hex) {
+  state.color = hex;
+  $('#colorPicker').value = hex;
+  addRecent(hex);
+}
+function addRecent(hex) {
+  state.recent = [hex, ...state.recent.filter(c => c !== hex)].slice(0, 8);
+  const box = $('#recentColors');
+  box.innerHTML = '';
+  state.recent.forEach((c) => {
+    const s = document.createElement('button');
+    s.className = 'swatch';
+    s.style.background = c;
+    s.title = c;
+    s.addEventListener('click', () => setColor(c));
+    box.appendChild(s);
+  });
+}
+addRecent('#111111');
+
+/* --- Controles --- */
+$('#colorPicker').addEventListener('input', (e) => setColor(e.target.value));
+$('#brushSize').addEventListener('input', (e) => {
+  state.size = +e.target.value;
+  $('#sizeValue').textContent = state.size;
+  $('#brushLabel').textContent = t('tool.' + state.tool) + ' · ' + state.size + 'px';
+  drawOverlay();
+});
+$('#opacity').addEventListener('input', (e) => {
+  state.opacity = +e.target.value / 100;
+  $('#opacityValue').textContent = e.target.value;
+});
+$('#pressureChk').addEventListener('change', (e) => state.pressure = e.target.checked);
+$('#fillChk').addEventListener('change',   (e) => state.fill = e.target.checked);
+$('#gridChk').addEventListener('change',   (e) => { state.grid = e.target.checked; drawOverlay(); });
+$('#snapChk').addEventListener('change',   (e) => state.snap = e.target.checked);
+$('#symmetrySel').addEventListener('change', (e) => state.symmetry = e.target.value);
+
+$('#transparentChk').addEventListener('change', (e) => {
+  state.transparentBg = e.target.checked;
+  paintBackground();
+  pushHistory();
+  toast(t(state.transparentBg ? 'toast.bgTrans' : 'toast.bgSolid'), 'info');
+});
+$('#bgColor').addEventListener('input', (e) => {
+  state.bg = e.target.value;
+  if (!state.transparentBg) { paintBackground(); pushHistory(); }
+});
+
+$('#undoBtn').addEventListener('click', undo);
+$('#redoBtn').addEventListener('click', redo);
+$('#clearBtn').addEventListener('click', clearCanvas);
+
+/* --- Zoom --- */
+function applyZoom() {
+  canvas.style.width   = (W * state.zoom) + 'px';
+  canvas.style.height  = (H * state.zoom) + 'px';
+  overlay.style.width  = (W * state.zoom) + 'px';
+  overlay.style.height = (H * state.zoom) + 'px';
+  $('#zoomLabel').textContent = Math.round(state.zoom * 100) + '%';
+}
+function setZoom(z, manual = true) {
+  state.zoom = clamp(z, 0.1, 5);
+  if (manual) state.autoFit = false;
+  applyZoom();
+}
+function fitZoom() {
+  const stage = $('#stage');
+  const availW = stage.clientWidth - 48;
+  const availH = stage.clientHeight - 48;
+  const z = Math.min(availW / W, availH / H, 1);
+  state.autoFit = true;
+  setZoom(z, false);
+}
+$('#zoomIn').addEventListener('click', () => setZoom(state.zoom * 1.2));
+$('#zoomOut').addEventListener('click', () => setZoom(state.zoom / 1.2));
+$('#zoom100').addEventListener('click', () => setZoom(1));
+$('#zoomFit').addEventListener('click', fitZoom);
+window.addEventListener('resize', () => { if (state.autoFit) fitZoom(); });
+
+/* --- Tamaño del lienzo --- */
+function resizeCanvas(nw, nh, keep = true) {
+  const copy = makeLayer();
+  copy.getContext('2d').drawImage(canvas, 0, 0);
+  W = canvas.width = overlay.width = baseCanvas.width = strokeCanvas.width =
+      tempCanvas.width = nw;
+  H = canvas.height = overlay.height = baseCanvas.height = strokeCanvas.height =
+      tempCanvas.height = nh;
+  paintBackground();
+  if (keep) ctx.drawImage(copy, 0, 0);
+  $('#sizeLabel').textContent = `${W} × ${H}`;
+  fitZoom();
+  pushHistory();
+  drawOverlay();
+}
+$('#sizePreset').addEventListener('change', (e) => {
+  const [w, h] = e.target.value.split('x').map(Number);
+  resizeCanvas(w, h, true);
+  toast(t('toast.resized', { w, h }), 'success');
+});
+
+/* --- Filtros --- */
+$('#filterSel').addEventListener('change', (e) => {
+  const f = e.target.value;
+  if (!f) return;
+  tempCtx.setTransform(1, 0, 0, 1, 0, 0);
+  tempCtx.globalAlpha = 1; tempCtx.globalCompositeOperation = 'source-over';
+  tempCtx.clearRect(0, 0, W, H);
+  tempCtx.filter = f;
+  tempCtx.drawImage(canvas, 0, 0);
+  tempCtx.filter = 'none';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(tempCanvas, 0, 0);
+  pushHistory();
+  toast(t('toast.filtered'), 'success', 1600);
+  e.target.value = '';
+});
+
+/* --- Transformaciones --- */
+function transformCanvas(mode) {
+  const copy = makeLayer();
+  copy.getContext('2d').drawImage(canvas, 0, 0);
+  tempCtx.setTransform(1, 0, 0, 1, 0, 0);
+  tempCtx.clearRect(0, 0, W, H);
+  if (mode === 'flipH') {
+    tempCtx.translate(W, 0); tempCtx.scale(-1, 1);
+    tempCtx.drawImage(copy, 0, 0);
+  } else if (mode === 'flipV') {
+    tempCtx.translate(0, H); tempCtx.scale(1, -1);
+    tempCtx.drawImage(copy, 0, 0);
+  } else {
+    const deg = mode === 'rotR' ? 90 : -90;
+    tempCtx.translate(W/2, H/2);
+    tempCtx.rotate(deg * Math.PI / 180);
+    const s = Math.min(W/H, H/W, 1);
+    tempCtx.scale(s, s);
+    tempCtx.drawImage(copy, -W/2, -H/2);
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  if (!state.transparentBg) { ctx.fillStyle = state.bg; ctx.fillRect(0, 0, W, H); }
+  ctx.drawImage(tempCanvas, 0, 0);
+  pushHistory();
+  toast(t('toast.transformed'), 'success', 1500);
+}
+$('#rotateL').addEventListener('click', () => transformCanvas('rotL'));
+$('#rotateR').addEventListener('click', () => transformCanvas('rotR'));
+$('#flipH').addEventListener('click',   () => transformCanvas('flipH'));
+$('#flipV').addEventListener('click',   () => transformCanvas('flipV'));
+
+/* --- Exportación --- */
+function currentFormat() {
+  const f = $('#exportFormat').value;
+  const mime = f === 'jpeg' ? 'image/jpeg' : f === 'webp' ? 'image/webp' : 'image/png';
+  return { ext: f === 'jpeg' ? 'jpg' : f, mime };
+}
+function exportImage() {
+  const { ext, mime } = currentFormat();
+  const link = document.createElement('a');
+  link.download = `powerdraw-${Date.now()}.${ext}`;
+  link.href = canvas.toDataURL(mime, 0.92);
+  link.click();
+  toast(t('toast.exported', { f: ext.toUpperCase() }), 'success');
+}
+$('#saveBtn').addEventListener('click', exportImage);
+
+$('#openBtn').addEventListener('click', () => $('#fileInput').click());
+$('#fileInput').addEventListener('change', (e) => {
+  const file = e.target.files?.[0];
+  if (file) insertImageFile(file);
+  e.target.value = '';
+});
+
+function insertImageFile(file) {
+  if (!file.type.startsWith('image/')) { toast(t('toast.notimage'), 'error'); return; }
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(W / img.width, H / img.height, 1);
+    const dw = img.width * s, dh = img.height * s;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(img, (W - dw)/2, (H - dh)/2, dw, dh);
+    URL.revokeObjectURL(url);
+    pushHistory();
+    toast(t('toast.inserted'), 'success');
+  };
+  img.onerror = () => { toast(t('toast.readfail'), 'error'); URL.revokeObjectURL(url); };
+  img.src = url;
+}
+
+const wrapEl = $('#canvasWrap');
+['dragenter','dragover'].forEach(ev =>
+  wrapEl.addEventListener(ev, (e) => { e.preventDefault(); wrapEl.classList.add('dragover'); }));
+['dragleave','drop'].forEach(ev =>
+  wrapEl.addEventListener(ev, (e) => { e.preventDefault(); wrapEl.classList.remove('dragover'); }));
+wrapEl.addEventListener('drop', (e) => {
+  const file = e.dataTransfer?.files?.[0];
+  if (file) insertImageFile(file);
+});
+window.addEventListener('paste', (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const it of items) {
+    if (it.type.startsWith('image/')) {
+      insertImageFile(it.getAsFile());
       e.preventDefault();
+      break;
     }
+  }
+});
 
-    function draw(e) {
-      if (!isDrawing) return;
-      const pos = getMousePos(e);
+$('#copyBtn').addEventListener('click', async () => {
+  try {
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    toast(t('toast.copied'), 'success');
+  } catch (err) { toast(t('toast.nocopy'), 'error'); }
+});
 
-      ctx.beginPath();
-      ctx.moveTo(lastX, lastY);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.strokeStyle = currentTool === 'eraser' ? '#ffffff' : colorPicker.value;
-      ctx.lineWidth = brushSize.value;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.stroke();
+$('#shareBtn').addEventListener('click', async () => {
+  try {
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    const file = new File([blob], 'powerdraw.png', { type: 'image/png' });
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'PowerDraw' });
+    } else { toast(t('toast.noshare'), 'warn'); }
+  } catch (_) {}
+});
 
-      lastX = pos.x;
-      lastY = pos.y;
-      e.preventDefault();
-    }
+$('#printBtn').addEventListener('click', () => {
+  const win = window.open('', '_blank');
+  if (!win) { toast(t('toast.nopopup'), 'warn'); return; }
+  win.document.write(
+    `<title>PowerDraw</title>
+     <style>body{margin:0;display:grid;place-items:center;height:100vh}
+            img{max-width:100%;max-height:100%}</style>
+     <img src="${canvas.toDataURL('image/png')}" onload="window.print()">`
+  );
+  win.document.close();
+});
 
-    function stopDrawing() {
-      isDrawing = false;
-    }
+/* --- Autoguardado --- */
+const STORAGE_KEY = 'powerdraw.autosave.v2';
+let autosaveTimer = null;
 
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseout', stopDrawing);
+function scheduleAutosave() {
+  clearTimeout(autosaveTimer);
+  updateAutoStatus('saving');
+  autosaveTimer = setTimeout(saveToStorage, 1200);
+}
+function updateAutoStatus(mode) {
+  const el = $('#autoStatus');
+  if (!el) return;
+  if (mode === 'saving') {
+    el.textContent = t('status.saving');
+    el.className = 'status-warn';
+  } else if (mode === 'nospace') {
+    el.textContent = t('status.nospace');
+    el.className = 'status-warn';
+  } else {
+    el.textContent = t('status.saved');
+    el.className = 'status-ok';
+  }
+}
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      data: canvas.toDataURL('image/png'),
+      w: W, h: H, ts: Date.now()
+    }));
+    updateAutoStatus('saved');
+  } catch (err) { updateAutoStatus('nospace'); }
+}
+function restoreFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const obj = JSON.parse(raw);
+    if (!obj?.data) return false;
+    if (obj.w !== W || obj.h !== H) resizeCanvas(obj.w, obj.h, false);
+    const img = new Image();
+    img.onload = () => {
+      paintBackground();
+      ctx.drawImage(img, 0, 0);
+      pushHistory();
+      toast(t('toast.restored'), 'info', 4200);
+    };
+    img.src = obj.data;
+    return true;
+  } catch (err) { return false; }
+}
 
-    canvas.addEventListener('touchstart', startDrawing);
-    canvas.addEventListener('touchmove', draw);
-    canvas.addEventListener('touchend', stopDrawing);
+/* --- Tema --- */
+function setTheme(mode) {
+  document.documentElement.dataset.theme = mode;
+  $('#themeBtn').textContent = mode === 'dark' ? '☀️' : '🌙';
+  try { localStorage.setItem('powerdraw.theme', mode); } catch (_) {}
+}
+$('#themeBtn').addEventListener('click', () => {
+  setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+});
 
-    // Limpiar de un solo clic sin confirmación
-    clearBtn.addEventListener('click', () => {
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    });
+$('#fullscreenBtn').addEventListener('click', () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+});
 
-    saveBtn.addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = 'powerdraw-arte.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
-  </script>
+/* --- Ayuda --- */
+const helpDialog = $('#helpDialog');
+$('#helpBtn').addEventListener('click', () => helpDialog.showModal());
+$('#helpClose').addEventListener('click', () => helpDialog.close());
 
+/* --- Atajos --- */
+window.addEventListener('keydown', (e) => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
+  if (typing) return;
+  const ctrl = e.ctrlKey || e.metaKey;
+
+  if (ctrl && e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+  if (ctrl && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
+    e.preventDefault(); redo(); return;
+  }
+  if (ctrl && e.key.toLowerCase() === 's') { e.preventDefault(); exportImage(); return; }
+  if (ctrl && e.key.toLowerCase() === 'o') { e.preventDefault(); $('#fileInput').click(); return; }
+  if (ctrl) return;
+
+  const k = e.key.toLowerCase();
+  if (k === '?') { e.preventDefault(); helpDialog.showModal(); return; }
+  if (k === 'f') { $('#fullscreenBtn').click(); return; }
+  if (k === 'h') { $('#gridChk').checked = !$('#gridChk').checked; $('#gridChk').dispatchEvent(new Event('change')); return; }
+  if (k === 'j') { $('#snapChk').checked = !$('#snapChk').checked; $('#snapChk').dispatchEvent(new Event('change')); return; }
+  if (k === '[' || k === ']') {
+    const delta = k === '[' ? -Math.max(1, state.size * 0.15) : Math.max(1, state.size * 0.15);
+    state.size = clamp(Math.round(state.size + delta), 1, 120);
+    $('#brushSize').value = state.size;
+    $('#sizeValue').textContent = state.size;
+    $('#brushLabel').textContent = t('tool.' + state.tool) + ' · ' + state.size + 'px';
+    drawOverlay();
+    return;
+  }
+  if (k === '+' || k === '=') { setZoom(state.zoom * 1.2); return; }
+  if (k === '-') { setZoom(state.zoom / 1.2); return; }
+  if (k === '0') { fitZoom(); return; }
+
+  const tool = TOOLS.find(x => x.key === k);
+  if (tool) { setTool(tool.id); toast(tool.icon + ' ' + t('tool.' + tool.id), 'info', 1100); }
+});
+
+/* --- Inicialización --- */
+(function init() {
+  // Tema
+  let savedTheme = 'light';
+  try { savedTheme = localStorage.getItem('powerdraw.theme') || 'light'; } catch (_) {}
+  setTheme(savedTheme);
+
+  // Idioma guardado (o autodetección del navegador)
+  let savedLang = null;
+  try { savedLang = localStorage.getItem(STORAGE_LANG); } catch (_) {}
+  if (!savedLang) {
+    const nav = (navigator.language || 'es').slice(0, 2).toLowerCase();
+    savedLang = I18N[nav] ? nav : 'es';
+  }
+  lang = savedLang;
+
+  // Rellenar selector de idioma
+  const sel = $('#langSel');
+  LANGUAGES.forEach((l) => {
+    const o = document.createElement('option');
+    o.value = l.code;
+    o.textContent = `${l.flag} ${l.label}`;
+    sel.appendChild(o);
+  });
+  sel.value = lang;
+  sel.addEventListener('change', (e) => setLanguage(e.target.value));
+
+  // Aplicar traducciones iniciales (marcará dir, lang, title, etc.)
+  const info = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
+  document.documentElement.dir = info.dir;
+  document.documentElement.lang = lang;
+
+  // Fondo inicial
+  paintBackground();
+
+  // Historial inicial
+  pushHistory();
+  refreshHistoryButtons();
+
+  // Etiquetas
+  $('#sizeLabel').textContent = `${W} × ${H}`;
+  $('#brushLabel').textContent = t('tool.' + state.tool) + ' · ' + state.size + 'px';
+  updateAutoStatus('saved');
+
+  // Aplicar traducciones a la UI completa
+  applyTranslations();
+
+  // Zoom
+  requestAnimationFrame(fitZoom);
+
+  // Restaurar trabajo
+  const restored = restoreFromStorage();
+
+  window.addEventListener('beforeunload', () => { try { saveToStorage(); } catch (_) {} });
+
+  if (!restored) {
+    setTimeout(() => toast(t('toast.welcome'), 'info', 4500), 500);
+  }
+})();
+</script>
 </body>
 </html>
